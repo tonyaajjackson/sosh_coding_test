@@ -32,9 +32,10 @@ def weekday(input):
 
 
 def test_weekday():
-    fail_test = weekday("notaweekday")
+    fail_input = "notaweekday"
+    fail_test = weekday(fail_input)
     assert fail_test["success"] == False
-    assert fail_test["rest"] == "notaweekday"
+    assert fail_test["rest"] == fail_input
 
     pass_test = weekday("Mon-Fri")
     assert pass_test["success"] == True
@@ -56,9 +57,10 @@ def start_range(input):
 
 
 def test_start_range():
-    fail_test = start_range("Mon")
+    fail_input = "Mon"
+    fail_test = start_range(fail_input)
     assert fail_test["success"] == False
-    assert fail_test["rest"] == "Mon"
+    assert fail_test["rest"] == fail_input
 
     pass_test = start_range("-Thu")
     assert pass_test["success"] == True
@@ -78,9 +80,10 @@ def space(input):
 
 
 def test_space():
-    fail_test = space("Mon")
+    fail_input = "Mon"
+    fail_test = space(fail_input)
     assert fail_test["success"] == False
-    assert fail_test["rest"] == "Mon"
+    assert fail_test["rest"] == fail_input
 
     pass_test = space(" Thu")
     assert pass_test["success"] == True
@@ -99,7 +102,7 @@ def sequence(parsers):
             if not success:
                 return {
                     "success": success,
-                    "rest": rest
+                    "rest": input
                 }
 
             next = rest
@@ -127,7 +130,7 @@ def test_sequence():
     fail_input = "Mon?"
     fail_test = sequence(parsers)(fail_input)
     assert fail_test["success"] == False
-    assert fail_test["rest"] == "?"
+    assert fail_test["rest"] == fail_input
 
 
 def either(parsers):
