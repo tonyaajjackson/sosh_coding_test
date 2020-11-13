@@ -15,3 +15,8 @@ for entry in entries:
         }
     )
 
+def parse_open_hours(hours_string):
+    ranges = hours_string.split("  / ")
+    print(ranges)
+
+parse_open_hours(restaurants[1]["hours_string"])
