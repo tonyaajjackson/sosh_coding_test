@@ -69,7 +69,50 @@ def test_start_range():
     assert pass_test["success"] == True
     assert pass_test["rest"] == "Thu"
 
+def sequence(parsers):
+    def apply_parsers(input):
+        next = input
+
+        for parser in parsers:
+            result = parser(next)
+            success = result["success"]
+            rest = result["rest"]
+
+            if not success:
+                return {
+                    "success": success,
+                    "rest": rest
+                }
+            
+            next = rest
+        
+        return {
+            "success": True,
+            "rest": next
+        }
+
+    return apply_parsers
+
+
+def test_sequence():
+    parsers = [
+        weekday,
+        start_range,
+        weekday
+    ]
+
+    pass_input = "Mon-Fri"
+    pass_test = sequence(parsers)(pass_input)
+    assert pass_test["success"] == True
+    assert pass_test["rest"] == ""
+
+    fail_input = "Mon?"
+    fail_test = sequence(parsers)(fail_input)
+    assert fail_test["success"] == False
+    assert fail_test["rest"] == "?"
+
 
 # Tests
 test_weekday()
 test_start_range()
+test_sequence()
