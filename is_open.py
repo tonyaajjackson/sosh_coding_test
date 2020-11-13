@@ -1,4 +1,5 @@
 import csv
+import calendar
 
 # Import file
 with open("rest_hours.csv", newline="") as f:
@@ -19,4 +20,27 @@ def parse_open_hours(hours_string):
     ranges = hours_string.split("  / ")
     print(ranges)
 
-parse_open_hours(restaurants[1]["hours_string"])
+def weekday(input):
+    if input[0:3] in list(calendar.day_abbr):
+        return {
+            "success": True,
+            "day_as_int": list(calendar.day_abbr).index(input[0:3]),
+            "rest": input[3:]
+        }
+    else:
+        return {
+            "success": False,
+            "rest": input
+        }
+
+def test_weekly():
+    fail_test = weekday("notaweekday")
+    assert fail_test["success"] == False
+    assert fail_test["rest"] == "notaweekday"
+    
+    pass_test = weekday("Mon-Fri")
+    assert pass_test["success"] == True
+    assert pass_test["day_as_int"] == 0
+    assert pass_test["rest"] == "-Fri"
+
+test_weekly()
