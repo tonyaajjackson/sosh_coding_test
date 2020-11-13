@@ -93,7 +93,7 @@ def test_space():
 
 
 def sequence(parsers):
-    def apply_parsers(input):
+    def sequence_lambda(input):
         next = input
 
         for parser in parsers:
@@ -114,7 +114,7 @@ def sequence(parsers):
             "rest": next
         }
 
-    return apply_parsers
+    return sequence_lambda
 
 
 def test_sequence():
@@ -135,8 +135,50 @@ def test_sequence():
     assert fail_test["rest"] == "?"
 
 
+def either(parsers):
+    def either_lambda(input):
+        next = input
+
+        for parser in parsers:
+            result = parser(next)
+            success = result["success"]
+            rest = result["rest"]
+
+            if success:
+               return {
+                    "success": success,
+                    "rest": rest
+                }
+
+            next = rest
+
+        return {
+            "success": False,
+            "rest": input
+        }
+
+    return either_lambda
+
+
+def test_either():
+    parsers = [
+        weekday,
+        space
+    ]
+
+    fail_input = "? Mon"
+    fail_test = either(parsers)(fail_input)
+    assert fail_test["success"] == False
+    assert fail_test["rest"] == fail_input
+
+    pass_input = " Mon"
+    pass_test = either(parsers)(pass_input)
+    assert pass_test["success"] == True
+    assert pass_test["rest"] == "Mon"
+
 # Tests
 test_weekday()
 test_start_range()
 test_space()
 test_sequence()
+test_either()
