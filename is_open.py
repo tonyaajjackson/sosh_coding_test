@@ -69,6 +69,29 @@ def test_start_range():
     assert pass_test["success"] == True
     assert pass_test["rest"] == "Thu"
 
+def space(input):
+    if input[0] == " ":
+        return {
+            "success": True,
+            "rest": input[1:]
+        }
+    else:
+        return {
+            "success": False,
+            "rest": input
+        }
+
+
+def test_space():
+    fail_test = space("Mon")
+    assert fail_test["success"] == False
+    assert fail_test["rest"] == "Mon"
+
+    pass_test = space(" Thu")
+    assert pass_test["success"] == True
+    assert pass_test["rest"] == "Thu"
+
+
 def sequence(parsers):
     def apply_parsers(input):
         next = input
@@ -83,9 +106,9 @@ def sequence(parsers):
                     "success": success,
                     "rest": rest
                 }
-            
+
             next = rest
-        
+
         return {
             "success": True,
             "rest": next
@@ -115,4 +138,5 @@ def test_sequence():
 # Tests
 test_weekday()
 test_start_range()
+test_space()
 test_sequence()
