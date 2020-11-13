@@ -16,9 +16,11 @@ for entry in entries:
         }
     )
 
+
 def parse_open_hours(hours_string):
     ranges = hours_string.split("  / ")
     print(ranges)
+
 
 def weekday(input):
     if input[0:3] in list(calendar.day_abbr):
@@ -33,15 +35,17 @@ def weekday(input):
             "rest": input
         }
 
+
 def test_weekly():
     fail_test = weekday("notaweekday")
     assert fail_test["success"] == False
     assert fail_test["rest"] == "notaweekday"
-    
+
     pass_test = weekday("Mon-Fri")
     assert pass_test["success"] == True
     assert pass_test["day_as_int"] == 0
     assert pass_test["rest"] == "-Fri"
+
 
 def start_range(input):
     if input[0] == "-":
@@ -54,6 +58,7 @@ def start_range(input):
             "success": False,
             "rest": input
         }
+
 
 def test_start_range():
     fail_test = start_range("Mon")
