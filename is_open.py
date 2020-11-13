@@ -17,11 +17,6 @@ for entry in entries:
     )
 
 
-def parse_open_hours(hours_string):
-    ranges = hours_string.split("  / ")
-    print(ranges)
-
-
 def weekday(input):
     if input[0:3] in list(calendar.day_abbr):
         return {
