@@ -43,4 +43,28 @@ def test_weekly():
     assert pass_test["day_as_int"] == 0
     assert pass_test["rest"] == "-Fri"
 
+def start_range(input):
+    if input[0] == "-":
+        return {
+            "success": True,
+            "rest": input[1:]
+        }
+    else:
+        return {
+            "success": False,
+            "rest": input
+        }
+
+def test_start_range():
+    fail_test = start_range("Mon")
+    assert fail_test["success"] == False
+    assert fail_test["rest"] == "Mon"
+
+    pass_test = start_range("-Thu")
+    assert pass_test["success"] == True
+    assert pass_test["rest"] == "Thu"
+
+
+# Tests
 test_weekly()
+test_start_range()
