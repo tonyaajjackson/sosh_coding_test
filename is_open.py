@@ -36,7 +36,7 @@ def weekday(input):
         }
 
 
-def test_weekly():
+def test_weekday():
     fail_test = weekday("notaweekday")
     assert fail_test["success"] == False
     assert fail_test["rest"] == "notaweekday"
@@ -71,5 +71,5 @@ def test_start_range():
 
 
 # Tests
-test_weekly()
+test_weekday()
 test_start_range()
