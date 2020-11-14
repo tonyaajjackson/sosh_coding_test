@@ -259,6 +259,70 @@ def test_day_range():
     ]
 
 
+def n_or_more(parser, n):
+    def n_or_more_lambda(input):
+        next = input
+        stack = []
+        n_success = 0
+        
+        while True:
+            result = parser(next)
+            success = result["success"]
+            rest = result["rest"]
+
+            if success:
+                n_success += 1
+            
+            if "stack" in result:
+                stack += result["stack"]
+
+            if not success:
+                if n_success > n:
+                    return {
+                        "success": True,
+                        "rest": next,
+                        "stack": stack
+                    }
+                else:
+                    return {
+                        "success": False,
+                        "rest": input
+                    }
+
+            next = rest
+
+    return n_or_more_lambda
+
+
+def test_n_or_more():
+    # Tests that should fail:
+    zero_match_input = "NoWeekdaysHere"
+    zero_match_test = n_or_more(weekday, 1)(zero_match_input)
+    assert zero_match_test["success"] == False
+    assert zero_match_test["rest"] == zero_match_input
+
+    less_than_n_input = "MonBanana"
+    less_than_n_test = n_or_more(weekday, 2)(less_than_n_input)
+    assert less_than_n_test["success"] == False
+    assert less_than_n_test["rest"] == less_than_n_input
+
+    # Tests that should pass
+    pass_input = "MonTueWedBanana"
+    pass_test = n_or_more(weekday, 2)(pass_input)
+    assert pass_test["success"] == True
+    assert pass_test["rest"] == "Banana"
+    assert pass_test["stack"] == [
+        {
+            "day_as_int": 0
+        },
+        {
+            "day_as_int": 1
+        },
+        {
+            "day_as_int": 2
+        }
+    ]
+
 # Tests
 test_weekday()
 test_start_range()
@@ -266,3 +330,4 @@ test_space()
 test_sequence()
 test_either()
 test_day_range()
+test_n_or_more()
