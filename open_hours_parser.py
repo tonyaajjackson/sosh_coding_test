@@ -341,6 +341,39 @@ def test_days():
     ]
 
 
+def numeral(input):
+    if input[0] in "0123456789":
+        return {
+            "success": True,
+            "rest": input[1:],
+            "stack": [
+                {
+                    "numeral": int(input[0])
+                }
+            ]
+        }
+    else:
+        return {
+            "success": False,
+            "rest": input
+        }
+
+
+def test_numeral():
+    fail_input = "a"
+    fail_result = numeral(fail_input)
+    assert fail_result["success"] == False
+    assert fail_result["rest"] == fail_input
+
+    pass_input = "55"
+    pass_result = numeral(pass_input)
+    assert pass_result["success"] == True
+    assert pass_result["rest"] == "5"
+    assert pass_result["stack"] == [
+        {
+            "numeral": 5
+        }
+    ]
 
 # Tests
 test_weekday()
@@ -350,3 +383,4 @@ test_either()
 test_day_range()
 test_n_or_more()
 test_days()
+test_numeral
