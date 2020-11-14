@@ -1,4 +1,5 @@
 import calendar
+from modular_datetime import ModularDatetime
 
 
 def weekday(input):
