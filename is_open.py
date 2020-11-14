@@ -255,11 +255,11 @@ def n_or_more(parser, n):
             if "stack" in result:
                 stack += result["stack"]
 
-            if not success:
+            if not success or rest == "":
                 if n_success > n:
                     return {
                         "success": True,
-                        "rest": next,
+                        "rest": rest,
                         "stack": stack
                     }
                 else:
@@ -286,11 +286,11 @@ def test_n_or_more():
     assert less_than_n_result["rest"] == less_than_n_input
 
     # Tests that should pass
-    pass_input = "MonTueWedBanana"
-    pass_result = n_or_more(weekday, 2)(pass_input)
-    assert pass_result["success"] == True
-    assert pass_result["rest"] == "Banana"
-    assert pass_result["stack"] == [
+    pass_with_tail_input = "MonTueWedBanana"
+    pass_with_tail_result = n_or_more(weekday, 2)(pass_with_tail_input)
+    assert pass_with_tail_result["success"] == True
+    assert pass_with_tail_result["rest"] == "Banana"
+    assert pass_with_tail_result["stack"] == [
         {
             "days": [0]
         },
@@ -302,6 +302,10 @@ def test_n_or_more():
         }
     ]
 
+    pass_without_tail_input = "aaaaaa"
+    pass_without_tail_result = n_or_more(char("a"), 1)(pass_without_tail_input)
+    assert pass_without_tail_result["success"] == True
+    assert pass_without_tail_result["rest"] == ""
 
 # Tests
 test_weekday()
