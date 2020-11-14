@@ -52,7 +52,7 @@ def test_weekday():
     ]
 
 
-def start_range(input):
+def dash(input):
     if input[0] == "-":
         return {
             "success": True,
@@ -65,13 +65,13 @@ def start_range(input):
         }
 
 
-def test_start_range():
+def test_dash():
     fail_input = "Mon"
-    fail_result = start_range(fail_input)
+    fail_result = dash(fail_input)
     assert fail_result["success"] == False
     assert fail_result["rest"] == fail_input
 
-    pass_result = start_range("-Thu")
+    pass_result = dash("-Thu")
     assert pass_result["success"] == True
     assert pass_result["rest"] == "Thu"
 
@@ -132,7 +132,7 @@ def sequence(parsers):
 def test_sequence():
     parsers = [
         weekday,
-        start_range,
+        dash,
         weekday
     ]
 
@@ -210,7 +210,7 @@ def day_range(input):
     result = sequence(
         [
             weekday,
-            start_range,
+            dash,
             weekday
         ]
     )(input)
@@ -326,7 +326,7 @@ def test_n_or_more():
 
 # Tests
 test_weekday()
-test_start_range()
+test_dash()
 test_space()
 test_sequence()
 test_either()
