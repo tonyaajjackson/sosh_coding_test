@@ -522,6 +522,7 @@ def hour(input):
     
     return result
 
+
 def test_hour():
     fail_input = "16"
     fail_result = hour(fail_input)
@@ -539,6 +540,39 @@ def test_hour():
     ]
 
 
+def minute(input):
+    result = number_in_range(
+        input,
+        0,
+        60
+    )
+
+    # Change "number_found" to "minute"
+    if result["success"]:
+        result["stack"].append(
+            {"minute": result["stack"].pop()["number_found"]}
+        )
+    
+    return result
+
+
+def test_minute():
+    fail_input = "75"
+    fail_result = minute(fail_input)
+    assert fail_result["success"] == False
+    assert fail_result["rest"] == fail_input
+
+    pass_input = "38a"
+    pass_result = minute(pass_input)
+    assert pass_result["success"] == True
+    assert pass_result["rest"] == "a"
+    assert pass_result["stack"] == [
+        {
+            "minute": 38
+        }
+    ]
+
+
 # Tests
 test_weekday()
 test_char()
@@ -551,3 +585,4 @@ test_numeral()
 test_number()
 test_number_in_range()
 test_hour()
+test_minute()
