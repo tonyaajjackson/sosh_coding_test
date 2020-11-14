@@ -704,10 +704,10 @@ def test_time():
     assert hour_and_min_result["rest"] == hour_and_min_input
 
     # Tests that should pass
-    single_digit_input = "1:02 am banana"
+    single_digit_input = "1:02 am"
     single_digit_result = time(single_digit_input)
     assert single_digit_result["success"] == True
-    assert single_digit_result["rest"] == "banana"
+    assert single_digit_result["rest"] == ""
     assert single_digit_result["stack"] == [
         {
             "hour": 1,
@@ -715,10 +715,21 @@ def test_time():
         }
     ]
 
-    double_digit_input = "10:56 am apple"
+    single_digit_with_tail_input = "3:05 am banana"
+    single_digit_with_tail_result = time(single_digit_with_tail_input)
+    assert single_digit_with_tail_result["success"] == True
+    assert single_digit_with_tail_result["rest"] == "banana"
+    assert single_digit_with_tail_result["stack"] == [
+        {
+            "hour": 3,
+            "minute": 5
+        }
+    ]
+
+    double_digit_input = "10:56 am"
     double_digit_result = time(double_digit_input)
     assert double_digit_result["success"] == True
-    assert double_digit_result["rest"] == "apple"
+    assert double_digit_result["rest"] == ""
     assert double_digit_result["stack"] == [
         {
             "hour": 10,
@@ -726,10 +737,10 @@ def test_time():
         }
     ]
 
-    pm_input = "6:24 pm orange"
+    pm_input = "6:24 pm"
     pm_result = time(pm_input)
     assert pm_result["success"] == True
-    assert pm_result["rest"] == "orange"
+    assert pm_result["rest"] == ""
     assert pm_result["stack"] == [
         {
             "hour": 18,
