@@ -1,5 +1,6 @@
 import csv
 import calendar
+from collections import deque
 
 # Import file
 with open("rest_hours.csv", newline="") as f:
@@ -21,8 +22,12 @@ def weekday(input):
     if input[0:3] in list(calendar.day_abbr):
         return {
             "success": True,
-            "day_as_int": list(calendar.day_abbr).index(input[0:3]),
-            "rest": input[3:]
+            "rest": input[3:],
+            "stack": [
+                {
+                    "day_as_int": list(calendar.day_abbr).index(input[0:3])
+                }
+            ]
         }
     else:
         return {
@@ -39,8 +44,12 @@ def test_weekday():
 
     pass_test = weekday("Mon-Fri")
     assert pass_test["success"] == True
-    assert pass_test["day_as_int"] == 0
     assert pass_test["rest"] == "-Fri"
+    assert pass_test["stack"] == [
+        {
+            "day_as_int": 0
+        }
+    ]
 
 
 def start_range(input):
@@ -65,6 +74,7 @@ def test_start_range():
     pass_test = start_range("-Thu")
     assert pass_test["success"] == True
     assert pass_test["rest"] == "Thu"
+
 
 def space(input):
     if input[0] == " ":
@@ -93,11 +103,14 @@ def test_space():
 def sequence(parsers):
     def sequence_lambda(input):
         next = input
+        stack = []
 
         for parser in parsers:
             result = parser(next)
             success = result["success"]
             rest = result["rest"]
+            if "stack" in result:
+                stack += result["stack"]
 
             if not success:
                 return {
@@ -109,7 +122,8 @@ def sequence(parsers):
 
         return {
             "success": True,
-            "rest": next
+            "rest": next,
+            "stack": stack
         }
 
     return sequence_lambda
@@ -126,6 +140,14 @@ def test_sequence():
     pass_test = sequence(parsers)(pass_input)
     assert pass_test["success"] == True
     assert pass_test["rest"] == ""
+    assert pass_test["stack"] == [
+        {
+            "day_as_int": 0
+        },
+        {
+            "day_as_int": 4
+        }
+    ]
 
     fail_input = "Mon?"
     fail_test = sequence(parsers)(fail_input)
@@ -136,16 +158,20 @@ def test_sequence():
 def either(parsers):
     def either_lambda(input):
         next = input
+        stack = []
 
         for parser in parsers:
             result = parser(next)
             success = result["success"]
             rest = result["rest"]
+            if "stack" in result:
+                stack += result["stack"]
 
             if success:
-               return {
+                return {
                     "success": success,
-                    "rest": rest
+                    "rest": rest,
+                    "stack": stack
                 }
 
             next = rest
@@ -160,8 +186,8 @@ def either(parsers):
 
 def test_either():
     parsers = [
-        weekday,
-        space
+        space,
+        weekday
     ]
 
     fail_input = "? Mon"
@@ -169,10 +195,16 @@ def test_either():
     assert fail_test["success"] == False
     assert fail_test["rest"] == fail_input
 
-    pass_input = " Mon"
+    pass_input = "Mon "
     pass_test = either(parsers)(pass_input)
     assert pass_test["success"] == True
-    assert pass_test["rest"] == "Mon"
+    assert pass_test["rest"] == " "
+    assert pass_test["stack"] == [
+        {
+            "day_as_int": 0
+        }
+    ]
+
 
 # Tests
 test_weekday()
