@@ -52,50 +52,29 @@ def test_weekday():
     ]
 
 
-def dash(input):
-    if input[0] == "-":
-        return {
-            "success": True,
-            "rest": input[1:]
-        }
-    else:
-        return {
-            "success": False,
-            "rest": input
-        }
+def char(c):
+    def char_lambda(input):
+        if input[0] == c:
+            return {
+                "success": True,
+                "rest": input[1:]
+            }
+        else:
+            return {
+                "success": False,
+                "rest": input
+            }
+    
+    return char_lambda
 
 
-def test_dash():
+def test_char():
     fail_input = "Mon"
-    fail_result = dash(fail_input)
+    fail_result = char("-")(fail_input)
     assert fail_result["success"] == False
     assert fail_result["rest"] == fail_input
 
-    pass_result = dash("-Thu")
-    assert pass_result["success"] == True
-    assert pass_result["rest"] == "Thu"
-
-
-def space(input):
-    if input[0] == " ":
-        return {
-            "success": True,
-            "rest": input[1:]
-        }
-    else:
-        return {
-            "success": False,
-            "rest": input
-        }
-
-
-def test_space():
-    fail_input = "Mon"
-    fail_result = space(fail_input)
-    assert fail_result["success"] == False
-    assert fail_result["rest"] == fail_input
-
-    pass_result = space(" Thu")
+    pass_result = char("-")("-Thu")
     assert pass_result["success"] == True
     assert pass_result["rest"] == "Thu"
 
@@ -132,7 +111,7 @@ def sequence(parsers):
 def test_sequence():
     parsers = [
         weekday,
-        dash,
+        char("-"),
         weekday
     ]
 
@@ -186,7 +165,7 @@ def either(parsers):
 
 def test_either():
     parsers = [
-        space,
+        char(" "),
         weekday
     ]
 
@@ -210,7 +189,7 @@ def day_range(input):
     result = sequence(
         [
             weekday,
-            dash,
+            char("-"),
             weekday
         ]
     )(input)
@@ -326,8 +305,7 @@ def test_n_or_more():
 
 # Tests
 test_weekday()
-test_dash()
-test_space()
+test_char()
 test_sequence()
 test_either()
 test_day_range()
