@@ -510,8 +510,8 @@ def test_number_in_range():
 def hour(input):
     result = number_in_range(
         input,
-        0,
-        12
+        1,
+        13
     )
 
     # Change "number_found" to "hour"
