@@ -1,5 +1,6 @@
 import calendar
 
+
 def weekday(input):
     if input[0:3] in list(calendar.day_abbr):
         return {
@@ -46,7 +47,7 @@ def char(c):
                 "success": False,
                 "rest": input
             }
-    
+
     return char_lambda
 
 
@@ -171,7 +172,6 @@ def day_range(input):
             weekday
         ]
     )(input)
-
 
     if result["success"]:
         end_day = result["stack"].pop()["days"][0]
@@ -299,7 +299,6 @@ def days(input):
         )
     ])(input)
 
-
     if not result["success"]:
         return {
             "success": False,
@@ -392,7 +391,7 @@ def number(input):
 
     for (index, item) in enumerate(result["stack"]):
         number_found += int(item["numeral"])*10**(index)
-    
+
     return {
         "success": result["success"],
         "rest": result["rest"],
