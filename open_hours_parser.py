@@ -682,13 +682,14 @@ def time(input):
         found_hour = (found_hour + 12) % 24
         # Convert to 24 hour clock with range [0, 23]
 
+    found_time = ModularDatetime(0, found_hour, found_minute)
+
     return {
         "success": True,
         "rest": result["rest"],
         "stack": [
             {
-                "hour": found_hour,
-                "minute": found_minute
+                "time": found_time
             }
         ]
     }
@@ -718,8 +719,7 @@ def test_time():
     assert single_digit_result["rest"] == ""
     assert single_digit_result["stack"] == [
         {
-            "hour": 1,
-            "minute": 2
+            "time": ModularDatetime(0, 1, 2)
         }
     ]
 
@@ -729,8 +729,7 @@ def test_time():
     assert single_digit_with_tail_result["rest"] == " banana"
     assert single_digit_with_tail_result["stack"] == [
         {
-            "hour": 3,
-            "minute": 5
+            "time": ModularDatetime(0, 3, 5)
         }
     ]
 
@@ -740,8 +739,7 @@ def test_time():
     assert double_digit_result["rest"] == ""
     assert double_digit_result["stack"] == [
         {
-            "hour": 10,
-            "minute": 56
+            "time": ModularDatetime(0, 10, 56)
         }
     ]
 
@@ -751,8 +749,7 @@ def test_time():
     assert pm_result["rest"] == ""
     assert pm_result["stack"] == [
         {
-            "hour": 18,
-            "minute": 24
+            "time": ModularDatetime(0, 18, 24)
         }
     ]
 
@@ -762,8 +759,7 @@ def test_time():
     assert noon_pm_result["rest"] == ""
     assert noon_pm_result["stack"] == [
         {
-            "hour": 12,
-            "minute": 56
+            "time": ModularDatetime(0, 12, 56)
         }
     ]
 
@@ -773,8 +769,7 @@ def test_time():
     assert midnight_am_result["rest"] == ""
     assert midnight_am_result["stack"] == [
         {
-            "hour": 0,
-            "minute": 43
+            "time": ModularDatetime(0, 0, 43)
         }
     ]
 
