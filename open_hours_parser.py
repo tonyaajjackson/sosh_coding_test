@@ -436,6 +436,73 @@ def test_number():
             "number_found": 567
         }
     ]
+
+
+def number_in_range(input, n, m):
+    result = number(input)
+
+    if not result["success"]:
+        return {
+            "success": False,
+            "rest": input
+        }
+
+    number_found = result["stack"][0]["number_found"]
+
+    if number_found < n or number_found > m:
+        return {
+            "success": False,
+            "rest": input
+        }
+
+    else:
+        return {
+            "success": True,
+            "rest": result["rest"],
+            "stack": [
+                {
+                    "number_found": number_found
+                }
+            ]
+        }
+
+
+def test_number_in_range():
+    # Tests that should fail
+    fail_input = "a"
+    fail_result = number_in_range(fail_input, 0, 10)
+    assert fail_result["success"] == False
+    assert fail_result["rest"] == fail_input
+
+    too_large_input = "13"
+    too_large_result = number_in_range(too_large_input, 0, 12)
+    assert too_large_result["success"] == False
+    assert too_large_result["rest"] == too_large_input
+
+    too_small_input = "4"
+    too_small_result = number_in_range(too_small_input, 5, 12)
+    assert too_small_result["success"] == False
+    assert too_small_result["rest"] == too_small_input
+
+    # Tests that should succeed
+    pass_without_tail_input = "10"
+    pass_without_tail_result = number_in_range(
+        pass_without_tail_input, 0, 12)
+    assert pass_without_tail_result["success"] == True
+    assert pass_without_tail_result["rest"] == ""
+    assert pass_without_tail_result["stack"] == [
+        {
+            "number_found": 10
+        }
+    ]
+
+    pass_with_tail_input = "7c"
+    pass_with_tail_result = number_in_range(pass_with_tail_input, 0, 12)
+    assert pass_with_tail_result["success"] == True
+    assert pass_with_tail_result["rest"] == "c"
+    assert pass_with_tail_result["stack"] == [
+        {
+            "number_found": 7
         }
     ]
 
@@ -450,3 +517,4 @@ test_n_or_more()
 test_days()
 test_numeral()
 test_number()
+test_number_in_range()
