@@ -519,7 +519,7 @@ def hour(input):
         result["stack"].append(
             {"hour": result["stack"].pop()["number_found"]}
         )
-    
+
     return result
 
 
@@ -552,7 +552,7 @@ def minute(input):
         result["stack"].append(
             {"minute": result["stack"].pop()["number_found"]}
         )
-    
+
     return result
 
 
@@ -585,7 +585,7 @@ def string(search_string):
                     "string": search_string
                 }
             ]
-        
+
         return result
     return string_lambda
 
@@ -609,6 +609,113 @@ def test_string():
     ]
 
 
+def time(input):
+    result = sequence([
+        either([
+            sequence([
+                hour,
+                char(":"),
+                minute
+            ]),
+            hour
+        ]),
+        char(" "),
+        either([
+            string("am"),
+            string("pm")
+        ]),
+        n_or_more(
+            char(" "),
+            n=0
+        )
+    ])(input)
+
+    if not result["success"]:
+        return result
+
+    is_pm = result["stack"].pop()["string"] == "pm"
+    found_minute = result["stack"].pop()["minute"]
+    found_hour = result["stack"].pop()["hour"]
+
+    if is_pm:
+        found_hour = (found_hour + 12) % 24
+        # Convert to 24 hour clock with range [0, 23]
+
+    return {
+        "success": True,
+        "rest": result["rest"],
+        "stack": [
+            {
+                "hour": found_hour,
+                "minute": found_minute
+            }
+        ]
+    }
+
+
+def test_time():
+    # Tests that should fail
+    no_time_input = "abcde"
+    no_time_result = time(no_time_input)
+    assert no_time_result["success"] == False
+    assert no_time_result["rest"] == no_time_input
+
+    only_hour_input = "12cde"
+    only_hour_result = time(only_hour_input)
+    assert only_hour_result["success"] == False
+    assert only_hour_result["rest"] == only_hour_input
+
+    hour_and_min_input = "12:45 cde"
+    hour_and_min_result = time(hour_and_min_input)
+    assert hour_and_min_result["success"] == False
+    assert hour_and_min_result["rest"] == hour_and_min_input
+
+    # Tests that should pass
+    single_digit_input = "1:02 am banana"
+    single_digit_result = time(single_digit_input)
+    assert single_digit_result["success"] == True
+    assert single_digit_result["rest"] == "banana"
+    assert single_digit_result["stack"] == [
+        {
+            "hour": 1,
+            "minute": 2
+        }
+    ]
+
+    double_digit_input = "10:56 am apple"
+    double_digit_result = time(double_digit_input)
+    assert double_digit_result["success"] == True
+    assert double_digit_result["rest"] == "apple"
+    assert double_digit_result["stack"] == [
+        {
+            "hour": 10,
+            "minute": 56
+        }
+    ]
+
+    pm_input = "6:24 pm orange"
+    pm_result = time(pm_input)
+    assert pm_result["success"] == True
+    assert pm_result["rest"] == "orange"
+    assert pm_result["stack"] == [
+        {
+            "hour": 18,
+            "minute": 24
+        }
+    ]
+
+    pm_overflow_input = "12:56 pm kiwi"
+    pm_overflow_result = time(pm_overflow_input)
+    assert pm_overflow_result["success"] == True
+    assert pm_overflow_result["rest"] == "kiwi"
+    assert pm_overflow_result["stack"] == [
+        {
+            "hour": 0,
+            "minute": 56
+        }
+    ]
+
+
 # Tests
 test_weekday()
 test_char()
@@ -623,3 +730,4 @@ test_number_in_range()
 test_hour()
 test_minute()
 test_string()
+test_time()
