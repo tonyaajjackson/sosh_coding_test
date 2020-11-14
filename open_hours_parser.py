@@ -449,7 +449,7 @@ def number_in_range(input, n, m):
 
     number_found = result["stack"][0]["number_found"]
 
-    if number_found < n or number_found > m:
+    if number_found < n or number_found >= m:
         return {
             "success": False,
             "rest": input
@@ -475,7 +475,7 @@ def test_number_in_range():
     assert fail_result["rest"] == fail_input
 
     too_large_input = "13"
-    too_large_result = number_in_range(too_large_input, 0, 12)
+    too_large_result = number_in_range(too_large_input, 0, 13)
     assert too_large_result["success"] == False
     assert too_large_result["rest"] == too_large_input
 
