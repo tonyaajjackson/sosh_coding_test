@@ -657,11 +657,7 @@ def time(input):
         either([
             string("am"),
             string("pm")
-        ]),
-        n_or_more(
-            char(" "),
-            n=0
-        )
+        ])
     ])(input)
 
     if not result["success"]:
@@ -724,7 +720,7 @@ def test_time():
     single_digit_with_tail_input = "3:05 am banana"
     single_digit_with_tail_result = time(single_digit_with_tail_input)
     assert single_digit_with_tail_result["success"] == True
-    assert single_digit_with_tail_result["rest"] == "banana"
+    assert single_digit_with_tail_result["rest"] == " banana"
     assert single_digit_with_tail_result["stack"] == [
         {
             "hour": 3,
