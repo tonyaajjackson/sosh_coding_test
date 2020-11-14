@@ -38,14 +38,14 @@ def weekday(input):
 
 def test_weekday():
     fail_input = "notaweekday"
-    fail_test = weekday(fail_input)
-    assert fail_test["success"] == False
-    assert fail_test["rest"] == fail_input
+    fail_result = weekday(fail_input)
+    assert fail_result["success"] == False
+    assert fail_result["rest"] == fail_input
 
-    pass_test = weekday("Mon-Fri")
-    assert pass_test["success"] == True
-    assert pass_test["rest"] == "-Fri"
-    assert pass_test["stack"] == [
+    pass_result = weekday("Mon-Fri")
+    assert pass_result["success"] == True
+    assert pass_result["rest"] == "-Fri"
+    assert pass_result["stack"] == [
         {
             "days": [0]
         }
@@ -67,13 +67,13 @@ def start_range(input):
 
 def test_start_range():
     fail_input = "Mon"
-    fail_test = start_range(fail_input)
-    assert fail_test["success"] == False
-    assert fail_test["rest"] == fail_input
+    fail_result = start_range(fail_input)
+    assert fail_result["success"] == False
+    assert fail_result["rest"] == fail_input
 
-    pass_test = start_range("-Thu")
-    assert pass_test["success"] == True
-    assert pass_test["rest"] == "Thu"
+    pass_result = start_range("-Thu")
+    assert pass_result["success"] == True
+    assert pass_result["rest"] == "Thu"
 
 
 def space(input):
@@ -91,13 +91,13 @@ def space(input):
 
 def test_space():
     fail_input = "Mon"
-    fail_test = space(fail_input)
-    assert fail_test["success"] == False
-    assert fail_test["rest"] == fail_input
+    fail_result = space(fail_input)
+    assert fail_result["success"] == False
+    assert fail_result["rest"] == fail_input
 
-    pass_test = space(" Thu")
-    assert pass_test["success"] == True
-    assert pass_test["rest"] == "Thu"
+    pass_result = space(" Thu")
+    assert pass_result["success"] == True
+    assert pass_result["rest"] == "Thu"
 
 
 def sequence(parsers):
@@ -137,10 +137,10 @@ def test_sequence():
     ]
 
     pass_input = "Mon-Fri"
-    pass_test = sequence(parsers)(pass_input)
-    assert pass_test["success"] == True
-    assert pass_test["rest"] == ""
-    assert pass_test["stack"] == [
+    pass_result = sequence(parsers)(pass_input)
+    assert pass_result["success"] == True
+    assert pass_result["rest"] == ""
+    assert pass_result["stack"] == [
         {
             "days": [0]
         },
@@ -150,9 +150,9 @@ def test_sequence():
     ]
 
     fail_input = "Mon?"
-    fail_test = sequence(parsers)(fail_input)
-    assert fail_test["success"] == False
-    assert fail_test["rest"] == fail_input
+    fail_result = sequence(parsers)(fail_input)
+    assert fail_result["success"] == False
+    assert fail_result["rest"] == fail_input
 
 
 def either(parsers):
@@ -191,15 +191,15 @@ def test_either():
     ]
 
     fail_input = "? Mon"
-    fail_test = either(parsers)(fail_input)
-    assert fail_test["success"] == False
-    assert fail_test["rest"] == fail_input
+    fail_result = either(parsers)(fail_input)
+    assert fail_result["success"] == False
+    assert fail_result["rest"] == fail_input
 
     pass_input = "Mon "
-    pass_test = either(parsers)(pass_input)
-    assert pass_test["success"] == True
-    assert pass_test["rest"] == " "
-    assert pass_test["stack"] == [
+    pass_result = either(parsers)(pass_input)
+    assert pass_result["success"] == True
+    assert pass_result["rest"] == " "
+    assert pass_result["stack"] == [
         {
             "days": [0]
         }
@@ -244,15 +244,15 @@ def day_range(input):
 
 def test_day_range():
     fail_input = "Mon-Cat"
-    fail_test = day_range(fail_input)
-    assert fail_test["success"] == False
-    assert fail_test["rest"] == fail_input
+    fail_result = day_range(fail_input)
+    assert fail_result["success"] == False
+    assert fail_result["rest"] == fail_input
 
     pass_input = "Mon-Fri "
-    pass_test = day_range(pass_input)
-    assert pass_test["success"] == True
-    assert pass_test["rest"] == " "
-    assert pass_test["stack"] == [
+    pass_result = day_range(pass_input)
+    assert pass_result["success"] == True
+    assert pass_result["rest"] == " "
+    assert pass_result["stack"] == [
         {
             "days": [0, 1, 2, 3, 4]
         }
@@ -297,21 +297,21 @@ def n_or_more(parser, n):
 def test_n_or_more():
     # Tests that should fail:
     zero_match_input = "NoWeekdaysHere"
-    zero_match_test = n_or_more(weekday, 1)(zero_match_input)
-    assert zero_match_test["success"] == False
-    assert zero_match_test["rest"] == zero_match_input
+    zero_match_result = n_or_more(weekday, 1)(zero_match_input)
+    assert zero_match_result["success"] == False
+    assert zero_match_result["rest"] == zero_match_input
 
     less_than_n_input = "MonBanana"
-    less_than_n_test = n_or_more(weekday, 2)(less_than_n_input)
-    assert less_than_n_test["success"] == False
-    assert less_than_n_test["rest"] == less_than_n_input
+    less_than_n_result = n_or_more(weekday, 2)(less_than_n_input)
+    assert less_than_n_result["success"] == False
+    assert less_than_n_result["rest"] == less_than_n_input
 
     # Tests that should pass
     pass_input = "MonTueWedBanana"
-    pass_test = n_or_more(weekday, 2)(pass_input)
-    assert pass_test["success"] == True
-    assert pass_test["rest"] == "Banana"
-    assert pass_test["stack"] == [
+    pass_result = n_or_more(weekday, 2)(pass_input)
+    assert pass_result["success"] == True
+    assert pass_result["rest"] == "Banana"
+    assert pass_result["stack"] == [
         {
             "days": [0]
         },
