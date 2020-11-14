@@ -307,6 +307,69 @@ def test_n_or_more():
     assert pass_without_tail_result["success"] == True
     assert pass_without_tail_result["rest"] == ""
 
+
+def days(input):
+    result = sequence([
+        either([
+            day_range,
+            weekday
+        ]),
+        n_or_more(
+            either([
+                day_range,
+                weekday,
+                char(","),
+                char(" ")
+            ]),
+            n=1
+        )
+    ])(input)
+
+    success = result["success"]
+    rest = result["rest"]
+
+    if not success:
+        return {
+            "success": False,
+            "rest": input
+        }
+
+    stack = result["stack"]
+
+    # Collate all days in the stack
+    days_all = []
+    for item in stack:
+        days_all += item["days"]
+
+    return {
+        "success": success,
+        "rest": rest,
+        "stack": [
+            {
+                "days_all": days_all
+            }
+        ]
+    }
+
+
+def test_days():
+    fail_input = " Mon"
+    fail_result = days(fail_input)
+    assert fail_result["success"] == False
+    assert fail_result["rest"] == fail_input
+
+    pass_input = "Mon-Tue, Thu, Sat-Sun 9:00"
+    pass_result = days(pass_input)
+    assert pass_result["success"] == True
+    assert pass_result["rest"] == "9:00"
+    assert pass_result["stack"] == [
+        {
+            "days_all": [0, 1, 3, 5, 6]
+        }
+    ]
+
+
+
 # Tests
 test_weekday()
 test_char()
@@ -314,3 +377,4 @@ test_sequence()
 test_either()
 test_day_range()
 test_n_or_more()
+test_days()
