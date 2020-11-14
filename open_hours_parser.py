@@ -573,6 +573,42 @@ def test_minute():
     ]
 
 
+def string(search_string):
+    def string_lambda(input):
+        parsers = [char(c) for c in search_string]
+
+        result = sequence(parsers)(input)
+
+        if result["success"]:
+            result["stack"] = [
+                {
+                    "string": search_string
+                }
+            ]
+        
+        return result
+    return string_lambda
+
+
+def test_string():
+    search_string = "abcd"
+
+    fail_input = "qwerty"
+    fail_result = string(search_string)(fail_input)
+    assert fail_result["success"] == False
+    assert fail_result["rest"] == fail_input
+
+    pass_input = "abcde"
+    pass_result = string(search_string)(pass_input)
+    assert pass_result["success"] == True
+    assert pass_result["rest"] == "e"
+    assert pass_result["stack"] == [
+        {
+            "string": search_string
+        }
+    ]
+
+
 # Tests
 test_weekday()
 test_char()
@@ -586,3 +622,4 @@ test_number()
 test_number_in_range()
 test_hour()
 test_minute()
+test_string()
