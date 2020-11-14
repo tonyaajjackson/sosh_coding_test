@@ -774,6 +774,69 @@ def test_time():
     ]
 
 
+def time_range(input):
+    result = sequence([
+        time,
+        string(" - "),
+        time
+    ])(input)
+
+    if not result["success"]:
+        return result
+
+    close_time = result["stack"].pop()["time"]
+    result["stack"].pop()  # Throw away " - "
+    open_time = result["stack"].pop()["time"]
+
+    return {
+        "success": True,
+        "rest": result["rest"],
+        "stack": [
+            {
+                "open_time": open_time,
+                "close_time": close_time
+            }
+        ]
+    }
+
+
+def test_time_range():
+    # Tests that should fail
+    fail_inputs = [
+        "asdf",  # No valid input
+        "9:45 am",  # Only one time
+        "9:45 am - ",  # Only one time with separator
+    ]
+
+    for input in fail_inputs:
+        result = time_range(input)
+        assert result["success"] == False
+        assert result["rest"] == input
+
+    # Tests that should pass
+    pass_without_tail_input = "9:45 am - 10:15 pm"
+    pass_without_tail_result = time_range(pass_without_tail_input)
+    assert pass_without_tail_result["success"] == True
+    assert pass_without_tail_result["rest"] == ""
+    assert pass_without_tail_result["stack"] == [
+        {
+            "open_time": ModularDatetime(0, 9, 45),
+            "close_time": ModularDatetime(0, 22, 15)
+        }
+    ]
+
+    pass_with_tail_input = "4:15 pm - 2:38 am Monday"
+    pass_with_tail_result = time_range(pass_with_tail_input)
+    assert pass_with_tail_result["success"] == True
+    assert pass_with_tail_result["rest"] == " Monday"
+    assert pass_with_tail_result["stack"] == [
+        {
+            "open_time": ModularDatetime(0, 16, 15),
+            "close_time": ModularDatetime(0, 2, 38)
+        }
+    ]
+
+
 # Tests
 test_weekday()
 test_char()
@@ -789,3 +852,4 @@ test_hour()
 test_minute()
 test_string()
 test_time()
+test_time_range()
