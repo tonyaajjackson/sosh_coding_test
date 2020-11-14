@@ -86,18 +86,16 @@ def sequence(parsers):
 
         for parser in parsers:
             result = parser(next)
-            success = result["success"]
-            rest = result["rest"]
             if "stack" in result:
                 stack += result["stack"]
 
-            if not success:
+            if not result["success"]:
                 return {
-                    "success": success,
+                    "success": result["success"],
                     "rest": input
                 }
 
-            next = rest
+            next = result["rest"]
 
         return {
             "success": True,
@@ -141,19 +139,17 @@ def either(parsers):
 
         for parser in parsers:
             result = parser(next)
-            success = result["success"]
-            rest = result["rest"]
             if "stack" in result:
                 stack += result["stack"]
 
-            if success:
+            if result["success"]:
                 return {
-                    "success": success,
-                    "rest": rest,
+                    "success": result["success"],
+                    "rest": result["rest"],
                     "stack": stack
                 }
 
-            next = rest
+            next = result["rest"]
 
         return {
             "success": False,
@@ -194,10 +190,8 @@ def day_range(input):
         ]
     )(input)
 
-    success = result["success"]
-    rest = result["rest"]
 
-    if success:
+    if result["success"]:
         end_day = result["stack"].pop()["days"][0]
         start_day = result["stack"].pop()["days"][0]
 
@@ -209,8 +203,8 @@ def day_range(input):
         # Make sure end_day is included in range
 
         return {
-            "success": success,
-            "rest": rest,
+            "success": result["success"],
+            "rest": result["rest"],
             "stack": stack
         }
 
@@ -246,20 +240,18 @@ def n_or_more(parser, n):
 
         while True:
             result = parser(next)
-            success = result["success"]
-            rest = result["rest"]
 
-            if success:
+            if result["success"]:
                 n_success += 1
 
             if "stack" in result:
                 stack += result["stack"]
 
-            if not success or rest == "":
+            if not result["success"] or result["rest"] == "":
                 if n_success > n:
                     return {
                         "success": True,
-                        "rest": rest,
+                        "rest": result["rest"],
                         "stack": stack
                     }
                 else:
@@ -268,7 +260,7 @@ def n_or_more(parser, n):
                         "rest": input
                     }
 
-            next = rest
+            next = result["rest"]
 
     return n_or_more_lambda
 
@@ -325,10 +317,8 @@ def days(input):
         )
     ])(input)
 
-    success = result["success"]
-    rest = result["rest"]
 
-    if not success:
+    if not result["success"]:
         return {
             "success": False,
             "rest": input
@@ -342,8 +332,8 @@ def days(input):
         days_all += item["days"]
 
     return {
-        "success": success,
-        "rest": rest,
+        "success": result["success"],
+        "rest": result["rest"],
         "stack": [
             {
                 "days_all": days_all
