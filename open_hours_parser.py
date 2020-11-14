@@ -670,7 +670,12 @@ def time(input):
         return result
 
     is_pm = result["stack"].pop()["string"] == "pm"
-    found_minute = result["stack"].pop()["minute"]
+    
+    if "minute" in result["stack"][-1]:
+        found_minute = result["stack"].pop()["minute"]
+    else:
+        found_minute = 0
+
     found_hour = result["stack"].pop()["hour"]
 
     if found_hour == 12:
@@ -770,6 +775,16 @@ def test_time():
     assert midnight_am_result["stack"] == [
         {
             "time": ModularDatetime(0, 0, 43)
+        }
+    ]
+
+    no_minute_input = "9 am"
+    no_minute_result = time(no_minute_input)
+    assert no_minute_result["success"] == True
+    assert no_minute_result["rest"] == ""
+    assert no_minute_result["stack"] == [
+        {
+            "time": ModularDatetime(0, 9, 0)
         }
     ]
 
