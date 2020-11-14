@@ -25,7 +25,7 @@ def weekday(input):
             "rest": input[3:],
             "stack": [
                 {
-                    "day_as_int": list(calendar.day_abbr).index(input[0:3])
+                    "days": [list(calendar.day_abbr).index(input[0:3])]
                 }
             ]
         }
@@ -47,7 +47,7 @@ def test_weekday():
     assert pass_test["rest"] == "-Fri"
     assert pass_test["stack"] == [
         {
-            "day_as_int": 0
+            "days": [0]
         }
     ]
 
@@ -142,10 +142,10 @@ def test_sequence():
     assert pass_test["rest"] == ""
     assert pass_test["stack"] == [
         {
-            "day_as_int": 0
+            "days": [0]
         },
         {
-            "day_as_int": 4
+            "days": [4]
         }
     ]
 
@@ -201,7 +201,7 @@ def test_either():
     assert pass_test["rest"] == " "
     assert pass_test["stack"] == [
         {
-            "day_as_int": 0
+            "days": [0]
         }
     ]
 
@@ -219,8 +219,8 @@ def day_range(input):
     rest = result["rest"]
 
     if success:
-        end_day = result["stack"].pop()["day_as_int"]
-        start_day = result["stack"].pop()["day_as_int"]
+        end_day = result["stack"].pop()["days"][0]
+        start_day = result["stack"].pop()["days"][0]
 
         stack = [
             {
@@ -264,7 +264,7 @@ def n_or_more(parser, n):
         next = input
         stack = []
         n_success = 0
-        
+
         while True:
             result = parser(next)
             success = result["success"]
@@ -272,7 +272,7 @@ def n_or_more(parser, n):
 
             if success:
                 n_success += 1
-            
+
             if "stack" in result:
                 stack += result["stack"]
 
@@ -313,15 +313,16 @@ def test_n_or_more():
     assert pass_test["rest"] == "Banana"
     assert pass_test["stack"] == [
         {
-            "day_as_int": 0
+            "days": [0]
         },
         {
-            "day_as_int": 1
+            "days": [1]
         },
         {
-            "day_as_int": 2
+            "days": [2]
         }
     ]
+
 
 # Tests
 test_weekday()
