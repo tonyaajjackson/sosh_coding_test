@@ -375,6 +375,70 @@ def test_numeral():
         }
     ]
 
+
+def number(input):
+    result = n_or_more(
+        numeral,
+        n=1
+    )(input)
+
+    if not result["success"]:
+        return {
+            "success": False,
+            "rest": input
+        }
+
+    number_found = 0
+
+    for (index, item) in enumerate(result["stack"]):
+        number_found += int(item["numeral"])*10**(index)
+    
+    return {
+        "success": result["success"],
+        "rest": result["rest"],
+        "stack": [
+            {"number_found": number_found}
+        ]
+    }
+
+
+def test_number():
+    fail_input = "aa"
+    fail_result = number(fail_input)
+    assert fail_result["success"] == False
+    assert fail_result["rest"] == fail_input
+
+    pass_single_input = "5a"
+    pass_single_result = number(pass_single_input)
+    assert pass_single_result["success"] == True
+    assert pass_single_result["rest"] == "a"
+    assert pass_single_result["stack"] == [
+        {
+            "number_found": 5
+        }
+    ]
+
+    pass_double_input = "55a5"
+    pass_double_result = number(pass_double_input)
+    assert pass_double_result["success"] == True
+    assert pass_double_result["rest"] == "a5"
+    assert pass_double_result["stack"] == [
+        {
+            "number_found": 55
+        }
+    ]
+
+    pass_triple_input = "555"
+    pass_triple_result = number(pass_triple_input)
+    assert pass_triple_result["success"] == True
+    assert pass_triple_result["rest"] == ""
+    assert pass_triple_result["stack"] == [
+        {
+            "number_found": 555
+        }
+    ]
+
+
 # Tests
 test_weekday()
 test_char()
@@ -384,3 +448,4 @@ test_day_range()
 test_n_or_more()
 test_days()
 test_numeral()
+test_number()
