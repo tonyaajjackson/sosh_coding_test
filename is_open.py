@@ -206,9 +206,63 @@ def test_either():
     ]
 
 
+def day_range(input):
+    result = sequence(
+        [
+            weekday,
+            start_range,
+            weekday
+        ]
+    )(input)
+
+    success = result["success"]
+    rest = result["rest"]
+
+    if success:
+        end_day = result["stack"].pop()["day_as_int"]
+        start_day = result["stack"].pop()["day_as_int"]
+
+        stack = [
+            {
+                "days": list(range(start_day, end_day + 1))
+            }
+        ]
+        # Make sure end_day is included in range
+
+        return {
+            "success": success,
+            "rest": rest,
+            "stack": stack
+        }
+
+    else:
+        return {
+            "success": False,
+            "rest": input
+        }
+
+
+def test_day_range():
+    fail_input = "Mon-Cat"
+    fail_test = day_range(fail_input)
+    assert fail_test["success"] == False
+    assert fail_test["rest"] == fail_input
+
+    pass_input = "Mon-Fri "
+    pass_test = day_range(pass_input)
+    assert pass_test["success"] == True
+    assert pass_test["rest"] == " "
+    assert pass_test["stack"] == [
+        {
+            "days": [0, 1, 2, 3, 4]
+        }
+    ]
+
+
 # Tests
 test_weekday()
 test_start_range()
 test_space()
 test_sequence()
 test_either()
+test_day_range()
