@@ -69,6 +69,12 @@ def sequence(parsers):
         stack = []
 
         for parser in parsers:
+            if next == "":
+                return {
+                    "success": False,
+                    "rest": input
+                }
+            
             result = parser(next)
             if "stack" in result:
                 stack += result["stack"]
