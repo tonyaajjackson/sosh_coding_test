@@ -670,6 +670,11 @@ def time(input):
     found_minute = result["stack"].pop()["minute"]
     found_hour = result["stack"].pop()["hour"]
 
+    if found_hour == 12:
+        # PM spans [12, 1, 2, ... 10, 11].
+        # Make PM actually span [1, 12]
+        is_pm = not is_pm
+
     if is_pm:
         found_hour = (found_hour + 12) % 24
         # Convert to 24 hour clock with range [0, 23]
@@ -748,14 +753,25 @@ def test_time():
         }
     ]
 
-    pm_overflow_input = "12:56 pm kiwi"
-    pm_overflow_result = time(pm_overflow_input)
-    assert pm_overflow_result["success"] == True
-    assert pm_overflow_result["rest"] == "kiwi"
-    assert pm_overflow_result["stack"] == [
+    noon_pm_input = "12:56 pm"
+    noon_pm_result = time(noon_pm_input)
+    assert noon_pm_result["success"] == True
+    assert noon_pm_result["rest"] == ""
+    assert noon_pm_result["stack"] == [
+        {
+            "hour": 12,
+            "minute": 56
+        }
+    ]
+
+    midnight_am_input = "12:43 am"
+    midnight_am_result = time(midnight_am_input)
+    assert midnight_am_result["success"] == True
+    assert midnight_am_result["rest"] == ""
+    assert midnight_am_result["stack"] == [
         {
             "hour": 0,
-            "minute": 56
+            "minute": 43
         }
     ]
 
