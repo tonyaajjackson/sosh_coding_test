@@ -54,5 +54,60 @@ def test_modular_datetime():
     assert underflow_result == ModularDatetime(6, 9, 4)
 
 
+def datetime_in_range(start, end, current):
+    current_delta = (current - start)
+    end_delta = (end - start)
+
+    # If current == start, restaurant has just opened, therefore True
+    # If current == end, restaurant has just closed, therefore False
+    return current_delta < end_delta
+
+
+def test_current_in_range():
+    # No overflow
+    test_inputs = [
+        [
+            # No overflow
+            ModularDatetime(1, 0, 0),
+            ModularDatetime(3, 0, 0)
+        ],
+        [
+            # Overflow
+            ModularDatetime(6, 0, 0),
+            ModularDatetime(2, 0, 0)
+        ]
+    ]
+
+    for [start, end] in test_inputs:
+        # Just before
+        assert datetime_in_range(
+            start,
+            end,
+            start - ModularDatetime(1, 0, 0)
+        ) == False
+
+        # Start
+        assert datetime_in_range(
+            start,
+            end,
+            start
+        ) == True
+
+        # Midway
+        assert datetime_in_range(
+            start,
+            end,
+            start + ModularDatetime(1, 0, 0)
+        ) == True
+
+        # End
+        assert datetime_in_range(
+            start,
+            end,
+            end
+        ) == False
+
+
 # Tests
 test_modular_datetime()
+test_current_in_range()
