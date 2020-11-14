@@ -389,7 +389,7 @@ def number(input):
 
     number_found = 0
 
-    for (index, item) in enumerate(result["stack"]):
+    for (index, item) in enumerate(list(reversed(result["stack"]))):
         number_found += int(item["numeral"])*10**(index)
 
     return {
@@ -417,23 +417,25 @@ def test_number():
         }
     ]
 
-    pass_double_input = "55a5"
+    pass_double_input = "56a5"
     pass_double_result = number(pass_double_input)
     assert pass_double_result["success"] == True
     assert pass_double_result["rest"] == "a5"
     assert pass_double_result["stack"] == [
         {
-            "number_found": 55
+            "number_found": 56
         }
     ]
 
-    pass_triple_input = "555"
+    pass_triple_input = "567"
     pass_triple_result = number(pass_triple_input)
     assert pass_triple_result["success"] == True
     assert pass_triple_result["rest"] == ""
     assert pass_triple_result["stack"] == [
         {
-            "number_found": 555
+            "number_found": 567
+        }
+    ]
         }
     ]
 
