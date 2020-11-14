@@ -230,7 +230,7 @@ def n_or_more(parser, n):
                 stack += result["stack"]
 
             if not result["success"] or result["rest"] == "":
-                if n_success > n:
+                if n_success >= n:
                     return {
                         "success": True,
                         "rest": result["rest"],
@@ -277,7 +277,7 @@ def test_n_or_more():
     ]
 
     pass_without_tail_input = "aaaaaa"
-    pass_without_tail_result = n_or_more(char("a"), 1)(pass_without_tail_input)
+    pass_without_tail_result = n_or_more(char("a"), 6)(pass_without_tail_input)
     assert pass_without_tail_result["success"] == True
     assert pass_without_tail_result["rest"] == ""
 
