@@ -216,8 +216,22 @@ def test_day_range():
 
 def n_or_more(parser, n):
     def n_or_more_lambda(input):
-        next = input
         stack = []
+
+        if input == "":
+            if n == 0:
+                return {
+                    "success": True,
+                    "rest": input,
+                    "stack": stack
+                }
+            else:
+                return {
+                    "success": False,
+                    "rest": input
+                }
+
+        next = input
         n_success = 0
 
         while True:
@@ -259,6 +273,11 @@ def test_n_or_more():
     assert less_than_n_result["success"] == False
     assert less_than_n_result["rest"] == less_than_n_input
 
+    empty_string_input = ""
+    empty_string_result = n_or_more(char("a"), 1)(empty_string_input)
+    assert empty_string_result["success"] == False
+    assert empty_string_result["rest"] == empty_string_input
+
     # Tests that should pass
     pass_with_tail_input = "MonTueWedBanana"
     pass_with_tail_result = n_or_more(weekday, 2)(pass_with_tail_input)
@@ -280,6 +299,20 @@ def test_n_or_more():
     pass_without_tail_result = n_or_more(char("a"), 6)(pass_without_tail_input)
     assert pass_without_tail_result["success"] == True
     assert pass_without_tail_result["rest"] == ""
+
+    n_equals_zero_on_empty_string_input = ""
+    n_equals_zero_on_empty_string_result = n_or_more(
+        char("a"), 0)(n_equals_zero_on_empty_string_input)
+    assert n_equals_zero_on_empty_string_result["success"] == True
+    assert n_equals_zero_on_empty_string_result["rest"] == ""
+    assert n_equals_zero_on_empty_string_result["stack"] == []
+
+    n_equals_zero_on_tail_input = "sdfg"
+    n_equals_zero_on_tail_result = n_or_more(
+        char("a"), 0)(n_equals_zero_on_tail_input)
+    assert n_equals_zero_on_tail_result["success"] == True
+    assert n_equals_zero_on_tail_result["rest"] == "sdfg"
+    assert n_equals_zero_on_tail_result["stack"] == []
 
 
 def days(input):
