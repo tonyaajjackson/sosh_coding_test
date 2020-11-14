@@ -383,4 +383,4 @@ test_either()
 test_day_range()
 test_n_or_more()
 test_days()
-test_numeral
+test_numeral()
