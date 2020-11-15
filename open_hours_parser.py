@@ -903,6 +903,111 @@ def test_time_range():
     ]
 
 
+def datetime(input):
+    result = sequence([
+        days,
+        char(" "),
+        time_range
+    ])(input)
+
+    if not result["success"]:
+        return result
+
+    times_found = result["stack"].pop()
+    days_all_found = result["stack"].pop()["days_all"]
+
+    hours = []
+
+    if times_found["close_time"] < times_found["open_time"]:
+        day_rollover = ModularDatetime(1, 0, 0)
+    else:
+        day_rollover = ModularDatetime(0, 0, 0)
+
+    for day_found in days_all_found:
+        hours.append({
+            "open_datetime": ModularDatetime(day_found, 0, 0) + times_found["open_time"],
+            "close_datetime": ModularDatetime(day_found, 0, 0) + day_rollover + times_found["close_time"],
+        })
+
+    return {
+        "success": True,
+        "rest": result["rest"],
+        "stack": hours
+    }
+
+
+def test_datetime():
+    # Tests that should fail
+    fail_inputs = [
+        "",  # Empty string
+        "asdf",  # No valid input
+        "Mon, Wed-Fri ",  # Just days
+        "Tue-Thu, Sat 9:45 am",  # Missing end time
+    ]
+
+    for fail_input in fail_inputs:
+        result = datetime(fail_input)
+        assert result["success"] == False
+        assert result["rest"] == fail_input
+
+    # Tests that should pass
+    single_day_input = "Mon 9:45 am - 6 pm"
+    single_day_result = datetime(single_day_input)
+    assert single_day_result["success"] == True
+    assert single_day_result["rest"] == ""
+    assert single_day_result["stack"] == [
+        {
+            "open_datetime": ModularDatetime(0, 9, 45),
+            "close_datetime": ModularDatetime(0, 18, 0)
+        }
+    ]
+
+    multiple_day_input = "Mon-Wed, Fri 10:15 am - 5 pm"
+    multiple_day_result = datetime(multiple_day_input)
+    assert multiple_day_result["success"] == True
+    assert multiple_day_result["rest"] == ""
+    assert multiple_day_result["stack"] == [
+        {
+            "open_datetime": ModularDatetime(0, 10, 15),
+            "close_datetime": ModularDatetime(0, 17, 0)
+        },
+        {
+            "open_datetime": ModularDatetime(1, 10, 15),
+            "close_datetime": ModularDatetime(1, 17, 0)
+        },
+        {
+            "open_datetime": ModularDatetime(2, 10, 15),
+            "close_datetime": ModularDatetime(2, 17, 0)
+        },
+        {
+            "open_datetime": ModularDatetime(4, 10, 15),
+            "close_datetime": ModularDatetime(4, 17, 0)
+        }
+    ]
+
+    day_overflow_input = "Mon 1 pm - 2:30 am"
+    day_overflow_result = datetime(day_overflow_input)
+    assert day_overflow_result["success"] == True
+    assert day_overflow_result["rest"] == ""
+    assert day_overflow_result["stack"] == [
+        {
+            "open_datetime": ModularDatetime(0, 13, 0),
+            "close_datetime": ModularDatetime(1, 2, 30)
+        }
+    ]
+
+    week_overflow_input = "Sun 11 am - 4:15 am"
+    week_overflow_result = datetime(week_overflow_input)
+    assert week_overflow_result["success"] == True
+    assert week_overflow_result["rest"] == ""
+    assert week_overflow_result["stack"] == [
+        {
+            "open_datetime": ModularDatetime(6, 11, 0),
+            "close_datetime": ModularDatetime(0, 4, 15)
+        }
+    ]
+
+
 # Tests
 test_weekday()
 test_char()
@@ -919,4 +1024,4 @@ test_minute()
 test_string()
 test_time()
 test_time_range()
-# test_datetime()
+test_datetime()
