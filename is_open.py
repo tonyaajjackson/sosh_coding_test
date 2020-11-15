@@ -1,25 +1,36 @@
 import csv
+from datetime import datetime
 from open_hours_parser import parse_restaurant_hours
 
-# Import file
-with open("rest_hours.csv", newline="") as f:
-    entries = list(csv.reader(f))
 
-# Rearrange CSV into useful data structure
-restaurants = []
+def find_open_restaurants(csv_filename, search_datetime):
+    # Import file
+    with open(csv_filename, newline="") as f:
+        entries = list(csv.reader(f))
 
-for entry in entries:
-    restaurants.append(
-        {
-            "name": entry[0],
-            "hours_string": entry[1]
-        }
-    )
+    # Rearrange CSV into useful data structure
+    restaurants = []
 
-for (i, rest) in enumerate(restaurants):
-    result = parse_restaurant_hours(rest["hours_string"])
+    for entry in entries:
+        restaurants.append(
+            {
+                "name": entry[0],
+                "hours_string": entry[1]
+            }
+        )
 
-    assert result["success"] == True
-    assert result["rest"] == ""
+    for (i, rest) in enumerate(restaurants):
+        result = parse_restaurant_hours(rest["hours_string"])
 
-    restaurants[i]["hours_datetimes"] = result["stack"]
+        assert result["success"] == True
+        assert result["rest"] == ""
+
+        restaurants[i]["hours_datetimes"] = result["stack"]
+
+    return []
+
+
+csv_filename = "rest_hours.csv"
+search_datetime = datetime(2020, 11, 14)
+
+open_restaurants = find_open_restaurants(csv_filename, search_datetime)
