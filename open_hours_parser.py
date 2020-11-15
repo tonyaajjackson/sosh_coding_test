@@ -1008,6 +1008,110 @@ def test_datetime():
     ]
 
 
+def parse_restaurant_hours(input):
+    result = sequence([
+        datetime,
+        n_or_more(
+            sequence([
+                string("  / "),
+                datetime
+            ]),
+            n=0
+        )
+    ])(input)
+
+    if result["success"] == False:
+        return result
+
+    restaurant_hours_datetimes = []
+    for item in result["stack"]:
+        if "string" in item:
+            continue
+
+        restaurant_hours_datetimes.append(item)
+
+    return {
+        "success": True,
+        "rest": result["rest"],
+        "stack": restaurant_hours_datetimes
+    }
+
+
+def test_parse_restaurant_hours():
+    # Tests that should fail
+    fail_inputs = [
+        "",  # Empty string
+        "asdf",  # No valid input
+        "Mon, Wed-Fri",  # Just days
+        "Tue-Thu, Sat 9:45 am",  # Missing end time
+    ]
+
+    for fail_input in fail_inputs:
+        result = parse_restaurant_hours(fail_input)
+        assert result["success"] == False
+        assert result["rest"] == fail_input
+
+    # Tests that should pass
+    single_datetime_input = "Mon 9 am - 4 pm"
+    single_datetime_result = parse_restaurant_hours(single_datetime_input)
+    assert single_datetime_result["success"] == True
+    assert single_datetime_result["rest"] == ""
+    assert single_datetime_result["stack"] == [
+        {
+            "open_datetime": ModularDatetime(0, 9, 0),
+            "close_datetime": ModularDatetime(0, 16, 0)
+        }
+    ]
+
+    datetime_with_tail_input = "Tue-Thu 8 am - 9 pm Banana"
+    datetime_with_tail_result = parse_restaurant_hours(
+        datetime_with_tail_input)
+    assert datetime_with_tail_result["success"] == True
+    assert datetime_with_tail_result["rest"] == " Banana"
+    assert datetime_with_tail_result["stack"] == [
+        {
+            "open_datetime": ModularDatetime(1, 8, 0),
+            "close_datetime": ModularDatetime(1, 21, 0)
+        },
+        {
+            "open_datetime": ModularDatetime(2, 8, 0),
+            "close_datetime": ModularDatetime(2, 21, 0)
+        },
+        {
+            "open_datetime": ModularDatetime(3, 8, 0),
+            "close_datetime": ModularDatetime(3, 21, 0)
+        }
+    ]
+
+    multiple_datetimes_input = "Mon-Wed, Fri 8:00 am - 4:30 pm  / Sat 10 am - 2:30 pm"
+    multiple_datetimes_result = parse_restaurant_hours(
+        multiple_datetimes_input)
+    assert multiple_datetimes_result["success"] == True
+    assert multiple_datetimes_result["rest"] == ""
+    assert multiple_datetimes_result["stack"] == [
+        {
+            "open_datetime": ModularDatetime(0, 8, 0),
+            "close_datetime": ModularDatetime(0, 16, 30)
+        },
+        {
+            "open_datetime": ModularDatetime(1, 8, 0),
+            "close_datetime": ModularDatetime(1, 16, 30)
+        },
+        {
+            "open_datetime": ModularDatetime(2, 8, 0),
+            "close_datetime": ModularDatetime(2, 16, 30)
+        },
+        {
+            "open_datetime": ModularDatetime(4, 8, 0),
+            "close_datetime": ModularDatetime(4, 16, 30)
+        },
+        {
+            "open_datetime": ModularDatetime(5, 10, 0),
+            "close_datetime": ModularDatetime(5, 14, 30)
+        },
+    ]
+
+
 # Tests
 test_weekday()
 test_char()
@@ -1025,3 +1129,4 @@ test_string()
 test_time()
 test_time_range()
 test_datetime()
+test_parse_restaurant_hours()
