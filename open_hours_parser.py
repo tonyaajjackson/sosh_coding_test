@@ -3,6 +3,12 @@ from modular_datetime import ModularDatetime, datetime_in_range
 
 
 def weekday(input):
+    if input == "":
+        return {
+            "success": False,
+            "rest": input
+        }
+    
     if input[0:3] in list(calendar.day_abbr):
         return {
             "success": True,
@@ -21,10 +27,14 @@ def weekday(input):
 
 
 def test_weekday():
-    fail_input = "notaweekday"
-    fail_result = weekday(fail_input)
-    assert fail_result["success"] == False
-    assert fail_result["rest"] == fail_input
+    fail_inputs = [
+        "",
+        "notaweekday"
+    ]
+    for fail_input in fail_inputs:
+        fail_result = weekday(fail_input)
+        assert fail_result["success"] == False
+        assert fail_result["rest"] == fail_input
 
     pass_result = weekday("Mon-Fri")
     assert pass_result["success"] == True
@@ -38,6 +48,12 @@ def test_weekday():
 
 def char(c):
     def char_lambda(input):
+        if input == "":
+            return {
+                "success": False,
+                "rest": input
+            }
+        
         if input[0] == c:
             return {
                 "success": True,
@@ -53,10 +69,14 @@ def char(c):
 
 
 def test_char():
-    fail_input = "Mon"
-    fail_result = char("-")(fail_input)
-    assert fail_result["success"] == False
-    assert fail_result["rest"] == fail_input
+    fail_inputs = [
+        "",
+        "Mon"
+    ]
+    for fail_input in fail_inputs:
+        fail_result = char("-")(fail_input)
+        assert fail_result["success"] == False
+        assert fail_result["rest"] == fail_input
 
     pass_result = char("-")("-Thu")
     assert pass_result["success"] == True
@@ -69,12 +89,6 @@ def sequence(parsers):
         stack = []
 
         for parser in parsers:
-            if next == "":
-                return {
-                    "success": False,
-                    "rest": input
-                }
-            
             result = parser(next)
             if "stack" in result:
                 stack += result["stack"]
@@ -224,20 +238,6 @@ def test_day_range():
 def n_or_more(parser, n):
     def n_or_more_lambda(input):
         stack = []
-
-        if input == "":
-            if n == 0:
-                return {
-                    "success": True,
-                    "rest": input,
-                    "stack": stack
-                }
-            else:
-                return {
-                    "success": False,
-                    "rest": input
-                }
-
         next = input
         n_success = 0
 
@@ -381,6 +381,12 @@ def test_days():
 
 
 def numeral(input):
+    if input == "":
+        return {
+            "success": False,
+            "rest": input
+        }
+    
     if input[0] in "0123456789":
         return {
             "success": True,
@@ -399,10 +405,14 @@ def numeral(input):
 
 
 def test_numeral():
-    fail_input = "a"
-    fail_result = numeral(fail_input)
-    assert fail_result["success"] == False
-    assert fail_result["rest"] == fail_input
+    fail_inputs = [
+        "",
+        "a"
+    ]
+    for fail_input in fail_inputs:
+        fail_result = numeral(fail_input)
+        assert fail_result["success"] == False
+        assert fail_result["rest"] == fail_input
 
     pass_input = "55"
     pass_result = numeral(pass_input)
