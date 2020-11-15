@@ -329,13 +329,14 @@ def days(input):
             weekday
         ]),
         n_or_more(
-            either([
-                day_range,
-                weekday,
-                char(","),
-                char(" ")
+            sequence([
+                string(", "),
+                either([
+                    day_range,
+                    weekday
+                ])
             ]),
-            n=1
+            n=0
         )
     ])(input)
 
@@ -350,6 +351,10 @@ def days(input):
     # Collate all days in the stack
     days_all = []
     for item in stack:
+        # Discard any separators that ended up in the stack
+        if "string" in item:
+            continue
+
         days_all += item["days"]
 
     return {
@@ -364,16 +369,52 @@ def days(input):
 
 
 def test_days():
-    fail_input = " Mon"
-    fail_result = days(fail_input)
-    assert fail_result["success"] == False
-    assert fail_result["rest"] == fail_input
+    # Tests that should fail
+    fail_inputs = [
+        "",
+        " Mon"
+    ]
+    for fail_input in fail_inputs:
+        fail_result = days(fail_input)
+        assert fail_result["success"] == False
+        assert fail_result["rest"] == fail_input
 
-    pass_input = "Mon-Tue, Thu, Sat-Sun 9:00"
-    pass_result = days(pass_input)
-    assert pass_result["success"] == True
-    assert pass_result["rest"] == "9:00"
-    assert pass_result["stack"] == [
+    # Tests that should pass
+    single_day_input = "Wed"
+    single_day_result = days(single_day_input)
+    assert single_day_result["success"] == True
+    assert single_day_result["rest"] == ""
+    assert single_day_result["stack"] == [
+        {
+            "days_all": [2]
+        }
+    ]
+    
+    day_range_input = "Mon-Fri"
+    day_range_result = days(day_range_input)
+    assert day_range_result["success"] == True
+    assert day_range_result["rest"] == ""
+    assert day_range_result["stack"] == [
+        {
+            "days_all": [0, 1, 2, 3, 4]
+        }
+    ]
+
+    days_input = "Mon-Wed, Fri"
+    days_result = days(days_input)
+    assert days_result["success"] == True
+    assert days_result["rest"] == ""
+    assert days_result["stack"] == [
+        {
+            "days_all": [0, 1, 2, 4]
+        }
+    ]
+
+    pass_with_tail_input = "Mon-Tue, Thu, Sat-Sun 9:00"
+    pass_with_tail_result = days(pass_with_tail_input)
+    assert pass_with_tail_result["success"] == True
+    assert pass_with_tail_result["rest"] == " 9:00"
+    assert pass_with_tail_result["stack"] == [
         {
             "days_all": [0, 1, 3, 5, 6]
         }
@@ -878,3 +919,4 @@ test_minute()
 test_string()
 test_time()
 test_time_range()
+# test_datetime()
