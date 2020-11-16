@@ -24,9 +24,18 @@ def test_char():
     for fail_input in fail_inputs:
         assert char("-")(fail_input) is None
 
-    (data, rest) = char("-")("-Thu")
-    assert data == []
-    assert rest == "Thu"
+    # Without tail
+    for c in printable:
+        (data, rest) = char(c)(c)
+        assert data == []
+        assert rest == ""
+    
+    # With tail
+    tail = " tail"
+    for c in printable:
+        (data, rest) = char(c)(c + tail)
+        assert data == []
+        assert rest == tail
 
 
 def numeral(input):
