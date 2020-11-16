@@ -89,10 +89,12 @@ def weekday(input):
         return None
 
     if input[0:3] in list(calendar.day_abbr):
+        day_num = list(calendar.day_abbr).index(input[0:3])
+
         return (
             [
                 {
-                    "days": [list(calendar.day_abbr).index(input[0:3])]
+                    "days": [ModularDatetime(day_num, 0, 0)]
                 }
             ],
             input[3:],
@@ -111,13 +113,25 @@ def test_weekday():
 
     for (index, day) in enumerate(list(calendar.day_abbr)):
         (data, rest) = weekday(day)
-        assert data == [{"days": [index]}]
+        assert data == [
+            {
+                "days": [
+                    ModularDatetime(index, 0, 0)
+                ]
+            }
+        ]
         assert rest == ""
 
     tail = "-Fri"
     for (index, day) in enumerate(list(calendar.day_abbr)):
         (data, rest) = weekday(day + tail)
-        assert data == [{"days": [index]}]
+        assert data == [
+            {
+                "days": [
+                    ModularDatetime(index, 0, 0)
+                ]
+            }
+        ]
         assert rest == tail
 
 
@@ -157,10 +171,10 @@ def test_sequence():
     (data, rest) = sequence(parsers)(pass_input)
     assert data == [
         {
-            "days": [0]
+            "days": [ModularDatetime(0, 0, 0)]
         },
         {
-            "days": [4]
+            "days": [ModularDatetime(4, 0, 0)]
         }
     ]
     assert rest == ""
@@ -250,13 +264,13 @@ def test_n_or_more():
     (data, rest) = n_or_more(weekday, 2)(pass_with_return_data_input)
     assert data == [
         {
-            "days": [0]
+            "days": [ModularDatetime(0, 0, 0)]
         },
         {
-            "days": [1]
+            "days": [ModularDatetime(1, 0, 0)]
         },
         {
-            "days": [2]
+            "days": [ModularDatetime(2, 0, 0)]
         }
     ]
     assert rest == ""
@@ -287,10 +301,19 @@ def day_range(input):
         start_day = data[0]["days"][0]
         end_day = data[1]["days"][0]
 
+        # Make range with modular arithmetic
+        one_day = ModularDatetime(1, 0, 0)
+        current_day = start_day
+        days = []
+
+        # Add one_day to exclude end_day from generated range
+        while current_day != (end_day + one_day):
+            days.append(current_day)
+            current_day += one_day
+
         data = [
             {
-                "days": list(range(start_day, end_day + 1))
-                # Include end_day in range
+                "days": days
             }
         ]
 
@@ -303,14 +326,48 @@ def test_day_range():
     fail_input = "Mon-Cat"
     assert day_range(fail_input) is None
 
-    pass_input = "Mon-Fri "
-    (data, rest) = day_range(pass_input)
+    pass_without_tail_input = "Wed-Sat"
+    (data, rest) = day_range(pass_without_tail_input)
     assert data == [
         {
-            "days": [0, 1, 2, 3, 4]
+            "days": [
+                ModularDatetime(2, 0, 0),
+                ModularDatetime(3, 0, 0),
+                ModularDatetime(4, 0, 0),
+                ModularDatetime(5, 0, 0),
+            ]
+        }
+    ]
+    assert rest == ""
+
+    pass_with_tail_input = "Mon-Fri "
+    (data, rest) = day_range(pass_with_tail_input)
+    assert data == [
+        {
+            "days": [
+                ModularDatetime(0, 0, 0),
+                ModularDatetime(1, 0, 0),
+                ModularDatetime(2, 0, 0),
+                ModularDatetime(3, 0, 0),
+                ModularDatetime(4, 0, 0),
+            ]
         }
     ]
     assert rest == " "
+
+    pass_with_overflow_input = "Sat-Tue"
+    (data, rest) = day_range(pass_with_overflow_input)
+    assert data == [
+        {
+            "days": [
+                ModularDatetime(5, 0, 0),
+                ModularDatetime(6, 0, 0),
+                ModularDatetime(0, 0, 0),
+                ModularDatetime(1, 0, 0),
+            ]
+        }
+    ]
+    assert rest == ""
 
 
 def days(rest):
@@ -365,7 +422,7 @@ def test_days():
     (data, rest) = days(single_day_input)
     assert data == [
         {
-            "days_all": [2]
+            "days_all": [ModularDatetime(2, 0, 0)]
         }
     ]
     assert rest == ""
@@ -374,7 +431,13 @@ def test_days():
     (data, rest) = days(day_range_input)
     assert data == [
         {
-            "days_all": [0, 1, 2, 3, 4]
+            "days_all": [
+                ModularDatetime(0, 0, 0),
+                ModularDatetime(1, 0, 0),
+                ModularDatetime(2, 0, 0),
+                ModularDatetime(3, 0, 0),
+                ModularDatetime(4, 0, 0),
+            ]
         }
     ]
     assert rest == ""
@@ -383,7 +446,12 @@ def test_days():
     (data, rest) = days(days_input)
     assert data == [
         {
-            "days_all": [0, 1, 2, 4]
+            "days_all": [
+                ModularDatetime(0, 0, 0),
+                ModularDatetime(1, 0, 0),
+                ModularDatetime(2, 0, 0),
+                ModularDatetime(4, 0, 0),
+            ]
         }
     ]
     assert rest == ""
@@ -392,7 +460,13 @@ def test_days():
     (data, rest) = days(pass_with_tail_input)
     assert data == [
         {
-            "days_all": [0, 1, 3, 5, 6]
+            "days_all": [
+                ModularDatetime(0, 0, 0),
+                ModularDatetime(1, 0, 0),
+                ModularDatetime(3, 0, 0),
+                ModularDatetime(5, 0, 0),
+                ModularDatetime(6, 0, 0),
+            ]
         }
     ]
     assert rest == " 9:00"
@@ -798,8 +872,8 @@ def datetime(input):
 
         for day_found in days_all_found:
             hours.append({
-                "open_datetime": ModularDatetime(day_found, 0, 0) + times_found["open_time"],
-                "close_datetime": ModularDatetime(day_found, 0, 0) + day_rollover + times_found["close_time"],
+                "open_datetime": day_found + times_found["open_time"],
+                "close_datetime": day_found + day_rollover + times_found["close_time"],
             })
 
         return (hours, rest)
