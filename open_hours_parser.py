@@ -4,26 +4,19 @@ from modular_datetime import ModularDatetime, datetime_in_range
 
 def weekday(input):
     if input == "":
-        return {
-            "success": False,
-            "rest": input
-        }
-    
+        return None
+
     if input[0:3] in list(calendar.day_abbr):
-        return {
-            "success": True,
-            "rest": input[3:],
-            "stack": [
+        return (
+            [
                 {
                     "days": [list(calendar.day_abbr).index(input[0:3])]
                 }
-            ]
-        }
+            ],
+            input[3:],
+        )
     else:
-        return {
-            "success": False,
-            "rest": input
-        }
+        return None
 
 
 def test_weekday():
@@ -32,38 +25,23 @@ def test_weekday():
         "notaweekday"
     ]
     for fail_input in fail_inputs:
-        fail_result = weekday(fail_input)
-        assert fail_result["success"] == False
-        assert fail_result["rest"] == fail_input
+        assert weekday(fail_input) is None
 
-    pass_result = weekday("Mon-Fri")
-    assert pass_result["success"] == True
-    assert pass_result["rest"] == "-Fri"
-    assert pass_result["stack"] == [
-        {
-            "days": [0]
-        }
-    ]
+    pass_input = "Mon-Fri"
+    (data, rest) = weekday(pass_input)
+    assert data == [{"days": [0]}]
+    assert rest == "-Fri"
 
 
 def char(c):
     def char_lambda(input):
         if input == "":
-            return {
-                "success": False,
-                "rest": input
-            }
-        
+            return None
+
         if input[0] == c:
-            return {
-                "success": True,
-                "rest": input[1:]
-            }
+            return ([], input[1:])
         else:
-            return {
-                "success": False,
-                "rest": input
-            }
+            return None
 
     return char_lambda
 
@@ -74,39 +52,27 @@ def test_char():
         "Mon"
     ]
     for fail_input in fail_inputs:
-        fail_result = char("-")(fail_input)
-        assert fail_result["success"] == False
-        assert fail_result["rest"] == fail_input
+        assert char("-")(fail_input) is None
 
-    pass_result = char("-")("-Thu")
-    assert pass_result["success"] == True
-    assert pass_result["rest"] == "Thu"
+    (data, rest) = char("-")("-Thu")
+    assert data == []
+    assert rest == "Thu"
 
 
 def sequence(parsers):
-    def sequence_lambda(input):
-        next = input
+    def sequence_lambda(rest):
         stack = []
 
         for parser in parsers:
-            result = parser(next)
-            if "stack" in result:
-                stack += result["stack"]
+            if result := parser(rest):
+                (data, rest) = result
 
-            if not result["success"]:
-                return {
-                    "success": result["success"],
-                    "rest": input
-                }
+                if data:
+                    stack += data
+            else:
+                return None
 
-            next = result["rest"]
-
-        return {
-            "success": True,
-            "rest": next,
-            "stack": stack
-        }
-
+        return (stack, rest)
     return sequence_lambda
 
 
@@ -117,11 +83,12 @@ def test_sequence():
         weekday
     ]
 
+    fail_input = "Mon?"
+    assert sequence(parsers)(fail_input) is None
+
     pass_input = "Mon-Fri"
-    pass_result = sequence(parsers)(pass_input)
-    assert pass_result["success"] == True
-    assert pass_result["rest"] == ""
-    assert pass_result["stack"] == [
+    (data, rest) = sequence(parsers)(pass_input)
+    assert data == [
         {
             "days": [0]
         },
@@ -129,37 +96,16 @@ def test_sequence():
             "days": [4]
         }
     ]
-
-    fail_input = "Mon?"
-    fail_result = sequence(parsers)(fail_input)
-    assert fail_result["success"] == False
-    assert fail_result["rest"] == fail_input
+    assert rest == ""
 
 
 def either(parsers):
-    def either_lambda(input):
-        next = input
-        stack = []
-
+    def either_lambda(rest):
         for parser in parsers:
-            result = parser(next)
-            if "stack" in result:
-                stack += result["stack"]
+            if result := parser(rest):
+                return result
 
-            if result["success"]:
-                return {
-                    "success": result["success"],
-                    "rest": result["rest"],
-                    "stack": stack
-                }
-
-            next = result["rest"]
-
-        return {
-            "success": False,
-            "rest": input
-        }
-
+        return None
     return either_lambda
 
 
@@ -170,100 +116,73 @@ def test_either():
     ]
 
     fail_input = "? Mon"
-    fail_result = either(parsers)(fail_input)
-    assert fail_result["success"] == False
-    assert fail_result["rest"] == fail_input
+    assert either(parsers)(fail_input) is None
 
     pass_input = "Mon "
-    pass_result = either(parsers)(pass_input)
-    assert pass_result["success"] == True
-    assert pass_result["rest"] == " "
-    assert pass_result["stack"] == [
+    (data, rest) = either(parsers)(pass_input)
+    assert data == [
         {
             "days": [0]
         }
     ]
+    assert rest == " "
 
 
 def day_range(input):
-    result = sequence(
+    if result := sequence(
         [
             weekday,
             char("-"),
             weekday
         ]
-    )(input)
+    )(input):
+        (data, rest) = result
+        start_day = data[0]["days"][0]
+        end_day = data[1]["days"][0]
 
-    if result["success"]:
-        end_day = result["stack"].pop()["days"][0]
-        start_day = result["stack"].pop()["days"][0]
-
-        stack = [
+        data = [
             {
                 "days": list(range(start_day, end_day + 1))
+                # Include end_day in range
             }
         ]
-        # Make sure end_day is included in range
 
-        return {
-            "success": result["success"],
-            "rest": result["rest"],
-            "stack": stack
-        }
-
+        return (data, rest)
     else:
-        return {
-            "success": False,
-            "rest": input
-        }
+        return None
 
 
 def test_day_range():
     fail_input = "Mon-Cat"
-    fail_result = day_range(fail_input)
-    assert fail_result["success"] == False
-    assert fail_result["rest"] == fail_input
+    assert day_range(fail_input) is None
 
     pass_input = "Mon-Fri "
-    pass_result = day_range(pass_input)
-    assert pass_result["success"] == True
-    assert pass_result["rest"] == " "
-    assert pass_result["stack"] == [
+    (data, rest) = day_range(pass_input)
+    assert data == [
         {
             "days": [0, 1, 2, 3, 4]
         }
     ]
+    assert rest == " "
 
 
 def n_or_more(parser, n):
-    def n_or_more_lambda(input):
+    def n_or_more_lambda(rest):
         stack = []
-        next = input
         n_success = 0
 
         while True:
-            result = parser(next)
-
-            if result["success"]:
+            if result := parser(rest):
+                (data, rest) = result
                 n_success += 1
 
-            if "stack" in result:
-                stack += result["stack"]
-
-            if not result["success"] or result["rest"] == "":
+                if data:
+                    stack += data
+            else:
                 if n_success >= n:
-                    return {
-                        "success": True,
-                        "rest": result["rest"],
-                        "stack": stack
-                    }
+                    return (stack, rest)
                 else:
-                    return {
-                        "success": False,
-                        "rest": input
-                    }
-
-            next = result["rest"]
+                    return None
 
     return n_or_more_lambda
 
@@ -271,26 +190,18 @@ def n_or_more(parser, n):
 def test_n_or_more():
     # Tests that should fail:
     zero_match_input = "NoWeekdaysHere"
-    zero_match_result = n_or_more(weekday, 1)(zero_match_input)
-    assert zero_match_result["success"] == False
-    assert zero_match_result["rest"] == zero_match_input
+    assert n_or_more(weekday, 1)(zero_match_input) is None
 
     less_than_n_input = "MonBanana"
-    less_than_n_result = n_or_more(weekday, 2)(less_than_n_input)
-    assert less_than_n_result["success"] == False
-    assert less_than_n_result["rest"] == less_than_n_input
+    assert n_or_more(weekday, 2)(less_than_n_input) is None
 
     empty_string_input = ""
-    empty_string_result = n_or_more(char("a"), 1)(empty_string_input)
-    assert empty_string_result["success"] == False
-    assert empty_string_result["rest"] == empty_string_input
+    assert n_or_more(char("a"), 1)(empty_string_input) is None
 
     # Tests that should pass
     pass_with_tail_input = "MonTueWedBanana"
-    pass_with_tail_result = n_or_more(weekday, 2)(pass_with_tail_input)
-    assert pass_with_tail_result["success"] == True
-    assert pass_with_tail_result["rest"] == "Banana"
-    assert pass_with_tail_result["stack"] == [
+    (data, rest) = n_or_more(weekday, 2)(pass_with_tail_input)
+    assert data == [
         {
             "days": [0]
         },
@@ -301,29 +212,28 @@ def test_n_or_more():
             "days": [2]
         }
     ]
+    assert rest == "Banana"
 
     pass_without_tail_input = "aaaaaa"
-    pass_without_tail_result = n_or_more(char("a"), 6)(pass_without_tail_input)
-    assert pass_without_tail_result["success"] == True
-    assert pass_without_tail_result["rest"] == ""
+    (data, rest) = n_or_more(char("a"), 6)(pass_without_tail_input)
+    assert data == []
+    assert rest == ""
 
     n_equals_zero_on_empty_string_input = ""
-    n_equals_zero_on_empty_string_result = n_or_more(
+    (data, rest) = n_or_more(
         char("a"), 0)(n_equals_zero_on_empty_string_input)
-    assert n_equals_zero_on_empty_string_result["success"] == True
-    assert n_equals_zero_on_empty_string_result["rest"] == ""
-    assert n_equals_zero_on_empty_string_result["stack"] == []
+    assert data == []
+    assert rest == ""
 
     n_equals_zero_on_tail_input = "sdfg"
-    n_equals_zero_on_tail_result = n_or_more(
+    (data, rest) = n_or_more(
         char("a"), 0)(n_equals_zero_on_tail_input)
-    assert n_equals_zero_on_tail_result["success"] == True
-    assert n_equals_zero_on_tail_result["rest"] == "sdfg"
-    assert n_equals_zero_on_tail_result["stack"] == []
+    assert data == []
+    assert rest == "sdfg"
 
 
-def days(input):
-    result = sequence([
+def days(rest):
+    if result := sequence([
         either([
             day_range,
             weekday
@@ -338,34 +248,26 @@ def days(input):
             ]),
             n=0
         )
-    ])(input)
+    ])(rest):
+        (data, rest) = result
 
-    if not result["success"]:
-        return {
-            "success": False,
-            "rest": input
-        }
+        # Collate all days in the stack
+        days_all = []
+        for item in data:
+            # Discard any separators that ended up in the stack
+            if "days" in item:
+                days_all += item["days"]
 
-    stack = result["stack"]
-
-    # Collate all days in the stack
-    days_all = []
-    for item in stack:
-        # Discard any separators that ended up in the stack
-        if "string" in item:
-            continue
-
-        days_all += item["days"]
-
-    return {
-        "success": result["success"],
-        "rest": result["rest"],
-        "stack": [
-            {
-                "days_all": days_all
-            }
-        ]
-    }
+        return (
+            [
+                {
+                    "days_all": days_all
+                }
+            ],
+            rest
+        )
+    else:
+        return None
 
 
 def test_days():
@@ -375,74 +277,61 @@ def test_days():
         " Mon"
     ]
     for fail_input in fail_inputs:
-        fail_result = days(fail_input)
-        assert fail_result["success"] == False
-        assert fail_result["rest"] == fail_input
+        assert days(fail_input) is None
 
     # Tests that should pass
     single_day_input = "Wed"
-    single_day_result = days(single_day_input)
-    assert single_day_result["success"] == True
-    assert single_day_result["rest"] == ""
-    assert single_day_result["stack"] == [
+    (data, rest) = days(single_day_input)
+    assert data == [
         {
             "days_all": [2]
         }
     ]
-    
+    assert rest == ""
+
     day_range_input = "Mon-Fri"
-    day_range_result = days(day_range_input)
-    assert day_range_result["success"] == True
-    assert day_range_result["rest"] == ""
-    assert day_range_result["stack"] == [
+    (data, rest) = days(day_range_input)
+    assert data == [
         {
             "days_all": [0, 1, 2, 3, 4]
         }
     ]
+    assert rest == ""
 
     days_input = "Mon-Wed, Fri"
-    days_result = days(days_input)
-    assert days_result["success"] == True
-    assert days_result["rest"] == ""
-    assert days_result["stack"] == [
+    (data, rest) = days(days_input)
+    assert data == [
         {
             "days_all": [0, 1, 2, 4]
         }
     ]
+    assert rest == ""
 
     pass_with_tail_input = "Mon-Tue, Thu, Sat-Sun 9:00"
-    pass_with_tail_result = days(pass_with_tail_input)
-    assert pass_with_tail_result["success"] == True
-    assert pass_with_tail_result["rest"] == " 9:00"
-    assert pass_with_tail_result["stack"] == [
+    (data, rest) = days(pass_with_tail_input)
+    assert data == [
         {
             "days_all": [0, 1, 3, 5, 6]
         }
     ]
+    assert rest == " 9:00"
 
 
 def numeral(input):
     if input == "":
-        return {
-            "success": False,
-            "rest": input
-        }
-    
+        return None
+
     if input[0] in "0123456789":
-        return {
-            "success": True,
-            "rest": input[1:],
-            "stack": [
+        return (
+            [
                 {
                     "numeral": int(input[0])
                 }
-            ]
-        }
+            ],
+            input[1:]
+        )
     else:
-        return {
-            "success": False,
-            "rest": input
-        }
+        return None
 
 
 def test_numeral():
@@ -451,233 +340,196 @@ def test_numeral():
         "a"
     ]
     for fail_input in fail_inputs:
-        fail_result = numeral(fail_input)
-        assert fail_result["success"] == False
-        assert fail_result["rest"] == fail_input
+        assert numeral(fail_input) is None
 
     pass_input = "55"
-    pass_result = numeral(pass_input)
-    assert pass_result["success"] == True
-    assert pass_result["rest"] == "5"
-    assert pass_result["stack"] == [
+    (data, rest) = numeral(pass_input)
+    assert data == [
         {
             "numeral": 5
         }
     ]
+    assert rest == "5"
 
 
 def number(input):
-    result = n_or_more(
+    if result := n_or_more(
         numeral,
         n=1
-    )(input)
+    )(input):
+        (data, rest) = result
+        number_found = 0
 
-    if not result["success"]:
-        return {
-            "success": False,
-            "rest": input
-        }
+        for (index, item) in enumerate(list(reversed(data))):
+            number_found += int(item["numeral"])*10**(index)
 
-    number_found = 0
-
-    for (index, item) in enumerate(list(reversed(result["stack"]))):
-        number_found += int(item["numeral"])*10**(index)
-
-    return {
-        "success": result["success"],
-        "rest": result["rest"],
-        "stack": [
-            {"number_found": number_found}
-        ]
-    }
+        return (
+            [
+                {
+                    "number_found": number_found
+                }
+            ],
+            rest
+        )
+    else:
+        return None
 
 
 def test_number():
     fail_input = "aa"
-    fail_result = number(fail_input)
-    assert fail_result["success"] == False
-    assert fail_result["rest"] == fail_input
+    assert number(fail_input) is None
 
     pass_single_input = "5a"
-    pass_single_result = number(pass_single_input)
-    assert pass_single_result["success"] == True
-    assert pass_single_result["rest"] == "a"
-    assert pass_single_result["stack"] == [
+    (data, rest) = number(pass_single_input)
+    assert data == [
         {
             "number_found": 5
         }
     ]
+    assert rest == "a"
 
     pass_double_input = "56a5"
-    pass_double_result = number(pass_double_input)
-    assert pass_double_result["success"] == True
-    assert pass_double_result["rest"] == "a5"
-    assert pass_double_result["stack"] == [
+    (data, rest) = number(pass_double_input)
+    assert data == [
         {
             "number_found": 56
         }
     ]
+    assert rest == "a5"
 
     pass_triple_input = "567"
-    pass_triple_result = number(pass_triple_input)
-    assert pass_triple_result["success"] == True
-    assert pass_triple_result["rest"] == ""
-    assert pass_triple_result["stack"] == [
+    (data, rest) = number(pass_triple_input)
+    assert data == [
         {
             "number_found": 567
         }
     ]
+    assert rest == ""
 
 
 def number_in_range(input, n, m):
-    result = number(input)
+    if result := number(input):
+        (data, rest) = result
+        number_found = data[0]["number_found"]
 
-    if not result["success"]:
-        return {
-            "success": False,
-            "rest": input
-        }
+        if number_found < n or number_found >= m:
+            return None
 
-    number_found = result["stack"][0]["number_found"]
-
-    if number_found < n or number_found >= m:
-        return {
-            "success": False,
-            "rest": input
-        }
-
+        else:
+            return (
+                [
+                    {
+                        "number_found": number_found
+                    }
+                ],
+                rest
+            )
     else:
-        return {
-            "success": True,
-            "rest": result["rest"],
-            "stack": [
-                {
-                    "number_found": number_found
-                }
-            ]
-        }
+        return None
 
 
 def test_number_in_range():
     # Tests that should fail
-    fail_input = "a"
-    fail_result = number_in_range(fail_input, 0, 10)
-    assert fail_result["success"] == False
-    assert fail_result["rest"] == fail_input
-
-    too_large_input = "13"
-    too_large_result = number_in_range(too_large_input, 0, 13)
-    assert too_large_result["success"] == False
-    assert too_large_result["rest"] == too_large_input
-
-    too_small_input = "4"
-    too_small_result = number_in_range(too_small_input, 5, 12)
-    assert too_small_result["success"] == False
-    assert too_small_result["rest"] == too_small_input
+    fail_inputs = [
+        "a",
+        "13",
+        "4"
+    ]
+    for fail_input in fail_inputs:
+        assert number_in_range(fail_input, 5, 12) is None
 
     # Tests that should succeed
     pass_without_tail_input = "10"
-    pass_without_tail_result = number_in_range(
-        pass_without_tail_input, 0, 12)
-    assert pass_without_tail_result["success"] == True
-    assert pass_without_tail_result["rest"] == ""
-    assert pass_without_tail_result["stack"] == [
+    (data, rest) = number_in_range(pass_without_tail_input, 0, 12)
+    assert data == [
         {
             "number_found": 10
         }
     ]
+    assert rest == ""
 
     pass_with_tail_input = "7c"
-    pass_with_tail_result = number_in_range(pass_with_tail_input, 0, 12)
-    assert pass_with_tail_result["success"] == True
-    assert pass_with_tail_result["rest"] == "c"
-    assert pass_with_tail_result["stack"] == [
+    (data, rest) = number_in_range(pass_with_tail_input, 0, 12)
+    assert data == [
         {
             "number_found": 7
         }
     ]
+    assert rest == "c"
 
 
 def hour(input):
-    result = number_in_range(
+    if result := number_in_range(
         input,
         1,
         13
-    )
+    ):
+        (data, rest) = result
 
-    # Change "number_found" to "hour"
-    if result["success"]:
-        result["stack"].append(
-            {"hour": result["stack"].pop()["number_found"]}
-        )
-
-    return result
+        # Change "number_found" to "hour"
+        data[0]["hour"] = data[0].pop("number_found")
+        return (data, rest)
+    else:
+        return None
 
 
 def test_hour():
     fail_input = "16"
-    fail_result = hour(fail_input)
-    assert fail_result["success"] == False
-    assert fail_result["rest"] == fail_input
+    assert hour(fail_input) is None
 
     pass_input = "6a"
-    pass_result = hour(pass_input)
-    assert pass_result["success"] == True
-    assert pass_result["rest"] == "a"
-    assert pass_result["stack"] == [
+    (data, rest) = hour(pass_input)
+    assert data == [
         {
             "hour": 6
         }
     ]
+    assert rest == "a"
 
 
 def minute(input):
-    result = number_in_range(
+    if result := number_in_range(
         input,
         0,
         60
-    )
+    ):
+        (data, rest) = result
 
-    # Change "number_found" to "minute"
-    if result["success"]:
-        result["stack"].append(
-            {"minute": result["stack"].pop()["number_found"]}
-        )
-
-    return result
+        # Change "number_found" to "minute"
+        data[0]["minute"] = data[0].pop("number_found")
+        return (data, rest)
+    else:
+        return None
 
 
 def test_minute():
     fail_input = "75"
-    fail_result = minute(fail_input)
-    assert fail_result["success"] == False
-    assert fail_result["rest"] == fail_input
+    assert minute(fail_input) is None
 
     pass_input = "38a"
-    pass_result = minute(pass_input)
-    assert pass_result["success"] == True
-    assert pass_result["rest"] == "a"
-    assert pass_result["stack"] == [
+    (data, rest) = minute(pass_input)
+    assert data == [
         {
             "minute": 38
         }
     ]
+    assert rest == "a"
 
 
 def string(search_string):
     def string_lambda(input):
         parsers = [char(c) for c in search_string]
 
-        result = sequence(parsers)(input)
-
-        if result["success"]:
-            result["stack"] = [
-                {
-                    "string": search_string
-                }
-            ]
-
-        return result
+        if result := sequence(parsers)(input):
+            (_, rest) = result
+            return (
+                [
+                    {
+                        "string": search_string
+                    }
+                ],
+                rest
+            )
     return string_lambda
 
 
@@ -685,23 +537,20 @@ def test_string():
     search_string = "abcd"
 
     fail_input = "qwerty"
-    fail_result = string(search_string)(fail_input)
-    assert fail_result["success"] == False
-    assert fail_result["rest"] == fail_input
+    assert string(search_string)(fail_input) is None
 
     pass_input = "abcde"
-    pass_result = string(search_string)(pass_input)
-    assert pass_result["success"] == True
-    assert pass_result["rest"] == "e"
-    assert pass_result["stack"] == [
+    (data, rest) = string(search_string)(pass_input)
+    assert data == [
         {
             "string": search_string
         }
     ]
+    assert rest == "e"
 
 
 def time(input):
-    result = sequence([
+    if result := sequence([
         either([
             sequence([
                 hour,
@@ -715,155 +564,139 @@ def time(input):
             string("am"),
             string("pm")
         ])
-    ])(input)
+    ])(input):
+        (data, rest) = result
+        is_pm = data.pop()["string"] == "pm"
 
-    if not result["success"]:
-        return result
+        if "minute" in data[-1]:
+            found_minute = data.pop()["minute"]
+        else:
+            found_minute = 0
 
-    is_pm = result["stack"].pop()["string"] == "pm"
-    
-    if "minute" in result["stack"][-1]:
-        found_minute = result["stack"].pop()["minute"]
+        found_hour = data.pop()["hour"]
+
+        if found_hour == 12:
+            # PM spans [12, 1, ... 10, 11].
+            # Make PM actually span [1...12]
+            is_pm = not is_pm
+
+        if is_pm:
+            found_hour = (found_hour + 12) % 24
+            # Convert to 24 hour clock with range [0, 23]
+
+        found_time = ModularDatetime(0, found_hour, found_minute)
+
+        return (
+            [
+                {
+                    "time": found_time
+                }
+            ],
+            rest
+        )
     else:
-        found_minute = 0
-
-    found_hour = result["stack"].pop()["hour"]
-
-    if found_hour == 12:
-        # PM spans [12, 1, 2, ... 10, 11].
-        # Make PM actually span [1, 12]
-        is_pm = not is_pm
-
-    if is_pm:
-        found_hour = (found_hour + 12) % 24
-        # Convert to 24 hour clock with range [0, 23]
-
-    found_time = ModularDatetime(0, found_hour, found_minute)
-
-    return {
-        "success": True,
-        "rest": result["rest"],
-        "stack": [
-            {
-                "time": found_time
-            }
-        ]
-    }
+        return None
 
 
 def test_time():
     # Tests that should fail
-    no_time_input = "abcde"
-    no_time_result = time(no_time_input)
-    assert no_time_result["success"] == False
-    assert no_time_result["rest"] == no_time_input
+    fail_inputs = [
+        "abcde",
+        "12cde",
+        "12:45 cde"
+    ]
 
-    only_hour_input = "12cde"
-    only_hour_result = time(only_hour_input)
-    assert only_hour_result["success"] == False
-    assert only_hour_result["rest"] == only_hour_input
-
-    hour_and_min_input = "12:45 cde"
-    hour_and_min_result = time(hour_and_min_input)
-    assert hour_and_min_result["success"] == False
-    assert hour_and_min_result["rest"] == hour_and_min_input
+    for fail_input in fail_inputs:
+        assert time(fail_input) is None
 
     # Tests that should pass
     single_digit_input = "1:02 am"
-    single_digit_result = time(single_digit_input)
-    assert single_digit_result["success"] == True
-    assert single_digit_result["rest"] == ""
-    assert single_digit_result["stack"] == [
+    (data, rest) = time(single_digit_input)
+    assert data == [
         {
             "time": ModularDatetime(0, 1, 2)
         }
     ]
+    assert rest == ""
 
     single_digit_with_tail_input = "3:05 am banana"
-    single_digit_with_tail_result = time(single_digit_with_tail_input)
-    assert single_digit_with_tail_result["success"] == True
-    assert single_digit_with_tail_result["rest"] == " banana"
-    assert single_digit_with_tail_result["stack"] == [
+    (data, rest) = time(single_digit_with_tail_input)
+    assert data == [
         {
             "time": ModularDatetime(0, 3, 5)
         }
     ]
+    assert rest == " banana"
 
     double_digit_input = "10:56 am"
-    double_digit_result = time(double_digit_input)
-    assert double_digit_result["success"] == True
-    assert double_digit_result["rest"] == ""
-    assert double_digit_result["stack"] == [
+    (data, rest) = time(double_digit_input)
+    assert data == [
         {
             "time": ModularDatetime(0, 10, 56)
         }
     ]
+    assert rest == ""
 
     pm_input = "6:24 pm"
-    pm_result = time(pm_input)
-    assert pm_result["success"] == True
-    assert pm_result["rest"] == ""
-    assert pm_result["stack"] == [
+    (data, rest) = time(pm_input)
+    assert data == [
         {
             "time": ModularDatetime(0, 18, 24)
         }
     ]
+    assert rest == ""
 
     noon_pm_input = "12:56 pm"
-    noon_pm_result = time(noon_pm_input)
-    assert noon_pm_result["success"] == True
-    assert noon_pm_result["rest"] == ""
-    assert noon_pm_result["stack"] == [
+    (data, rest) = time(noon_pm_input)
+    assert data == [
         {
             "time": ModularDatetime(0, 12, 56)
         }
     ]
+    assert rest == ""
 
     midnight_am_input = "12:43 am"
-    midnight_am_result = time(midnight_am_input)
-    assert midnight_am_result["success"] == True
-    assert midnight_am_result["rest"] == ""
-    assert midnight_am_result["stack"] == [
+    (data, rest) = time(midnight_am_input)
+    assert data == [
         {
             "time": ModularDatetime(0, 0, 43)
         }
     ]
+    assert rest == ""
 
     no_minute_input = "9 am"
-    no_minute_result = time(no_minute_input)
-    assert no_minute_result["success"] == True
-    assert no_minute_result["rest"] == ""
-    assert no_minute_result["stack"] == [
+    (data, rest) = time(no_minute_input)
+    assert data == [
         {
             "time": ModularDatetime(0, 9, 0)
         }
     ]
+    assert rest == ""
 
 
 def time_range(input):
-    result = sequence([
+    if result := sequence([
         time,
         string(" - "),
         time
-    ])(input)
+    ])(input):
+        (data, rest) = result
 
-    if not result["success"]:
-        return result
+        close_time = data.pop()["time"]
+        data.pop()  # Throw away " - "
+        open_time = data.pop()["time"]
 
-    close_time = result["stack"].pop()["time"]
-    result["stack"].pop()  # Throw away " - "
-    open_time = result["stack"].pop()["time"]
-
-    return {
-        "success": True,
-        "rest": result["rest"],
-        "stack": [
-            {
-                "open_time": open_time,
-                "close_time": close_time
-            }
-        ]
-    }
+        return (
+            [
+                {
+                    "open_time": open_time,
+                    "close_time": close_time
+                }
+            ],
+            rest
+        )
+    else:
+        return None
 
 
 def test_time_range():
@@ -875,65 +708,57 @@ def test_time_range():
     ]
 
     for input in fail_inputs:
-        result = time_range(input)
-        assert result["success"] == False
-        assert result["rest"] == input
+        assert time_range(input) is None
 
     # Tests that should pass
     pass_without_tail_input = "9:45 am - 10:15 pm"
-    pass_without_tail_result = time_range(pass_without_tail_input)
-    assert pass_without_tail_result["success"] == True
-    assert pass_without_tail_result["rest"] == ""
-    assert pass_without_tail_result["stack"] == [
+    (data, rest) = time_range(pass_without_tail_input)
+    assert data == [
         {
             "open_time": ModularDatetime(0, 9, 45),
             "close_time": ModularDatetime(0, 22, 15)
         }
     ]
+    assert rest == ""
 
     pass_with_tail_input = "4:15 pm - 2:38 am Monday"
-    pass_with_tail_result = time_range(pass_with_tail_input)
-    assert pass_with_tail_result["success"] == True
-    assert pass_with_tail_result["rest"] == " Monday"
-    assert pass_with_tail_result["stack"] == [
+    (data, rest) = time_range(pass_with_tail_input)
+    assert data == [
         {
             "open_time": ModularDatetime(0, 16, 15),
             "close_time": ModularDatetime(0, 2, 38)
         }
     ]
+    assert rest == " Monday"
 
 
 def datetime(input):
-    result = sequence([
+    if result := sequence([
         days,
         char(" "),
         time_range
-    ])(input)
+    ])(input):
+        (data, rest) = result
 
-    if not result["success"]:
-        return result
+        times_found = data.pop()
+        days_all_found = data.pop()["days_all"]
 
-    times_found = result["stack"].pop()
-    days_all_found = result["stack"].pop()["days_all"]
+        hours = []
 
-    hours = []
+        if times_found["close_time"] < times_found["open_time"]:
+            day_rollover = ModularDatetime(1, 0, 0)
+        else:
+            day_rollover = ModularDatetime(0, 0, 0)
 
-    if times_found["close_time"] < times_found["open_time"]:
-        day_rollover = ModularDatetime(1, 0, 0)
+        for day_found in days_all_found:
+            hours.append({
+                "open_datetime": ModularDatetime(day_found, 0, 0) + times_found["open_time"],
+                "close_datetime": ModularDatetime(day_found, 0, 0) + day_rollover + times_found["close_time"],
+            })
+
+        return (hours, rest)
     else:
-        day_rollover = ModularDatetime(0, 0, 0)
-
-    for day_found in days_all_found:
-        hours.append({
-            "open_datetime": ModularDatetime(day_found, 0, 0) + times_found["open_time"],
-            "close_datetime": ModularDatetime(day_found, 0, 0) + day_rollover + times_found["close_time"],
-        })
-
-    return {
-        "success": True,
-        "rest": result["rest"],
-        "stack": hours
-    }
+        return None
 
 
 def test_datetime():
@@ -946,27 +771,22 @@ def test_datetime():
     ]
 
     for fail_input in fail_inputs:
-        result = datetime(fail_input)
-        assert result["success"] == False
-        assert result["rest"] == fail_input
+        assert datetime(fail_input) is None
 
     # Tests that should pass
     single_day_input = "Mon 9:45 am - 6 pm"
-    single_day_result = datetime(single_day_input)
-    assert single_day_result["success"] == True
-    assert single_day_result["rest"] == ""
-    assert single_day_result["stack"] == [
+    (data, rest) = datetime(single_day_input)
+    assert data == [
         {
             "open_datetime": ModularDatetime(0, 9, 45),
             "close_datetime": ModularDatetime(0, 18, 0)
         }
     ]
+    assert rest == ""
 
     multiple_day_input = "Mon-Wed, Fri 10:15 am - 5 pm"
-    multiple_day_result = datetime(multiple_day_input)
-    assert multiple_day_result["success"] == True
-    assert multiple_day_result["rest"] == ""
-    assert multiple_day_result["stack"] == [
+    (data, rest) = datetime(multiple_day_input)
+    assert data == [
         {
             "open_datetime": ModularDatetime(0, 10, 15),
             "close_datetime": ModularDatetime(0, 17, 0)
@@ -984,32 +804,31 @@ def test_datetime():
             "close_datetime": ModularDatetime(4, 17, 0)
         }
     ]
+    assert rest == ""
 
     day_overflow_input = "Mon 1 pm - 2:30 am"
-    day_overflow_result = datetime(day_overflow_input)
-    assert day_overflow_result["success"] == True
-    assert day_overflow_result["rest"] == ""
-    assert day_overflow_result["stack"] == [
+    (data, rest) = datetime(day_overflow_input)
+    assert data == [
         {
             "open_datetime": ModularDatetime(0, 13, 0),
             "close_datetime": ModularDatetime(1, 2, 30)
         }
     ]
+    assert rest == ""
 
     week_overflow_input = "Sun 11 am - 4:15 am"
-    week_overflow_result = datetime(week_overflow_input)
-    assert week_overflow_result["success"] == True
-    assert week_overflow_result["rest"] == ""
-    assert week_overflow_result["stack"] == [
+    (data, rest) = datetime(week_overflow_input)
+    assert data == [
         {
             "open_datetime": ModularDatetime(6, 11, 0),
             "close_datetime": ModularDatetime(0, 4, 15)
         }
     ]
+    assert rest == ""
 
 
 def parse_restaurant_hours(input):
-    result = sequence([
+    if result := sequence([
         datetime,
         n_or_more(
             sequence([
@@ -1018,23 +837,19 @@ def parse_restaurant_hours(input):
             ]),
             n=0
         )
-    ])(input)
+    ])(input):
+        (data, rest) = result
 
-    if result["success"] == False:
-        return result
+        restaurant_hours_datetimes = []
+        for item in data:
+            if "string" in item:
+                continue
 
-    restaurant_hours_datetimes = []
-    for item in result["stack"]:
-        if "string" in item:
-            continue
+            restaurant_hours_datetimes.append(item)
 
-        restaurant_hours_datetimes.append(item)
-
-    return {
-        "success": True,
-        "rest": result["rest"],
-        "stack": restaurant_hours_datetimes
-    }
+        return (restaurant_hours_datetimes, rest)
+    else:
+        return None
 
 
 def test_parse_restaurant_hours():
@@ -1047,28 +862,22 @@ def test_parse_restaurant_hours():
     ]
 
     for fail_input in fail_inputs:
-        result = parse_restaurant_hours(fail_input)
-        assert result["success"] == False
-        assert result["rest"] == fail_input
+        assert parse_restaurant_hours(fail_input) is None
 
     # Tests that should pass
     single_datetime_input = "Mon 9 am - 4 pm"
-    single_datetime_result = parse_restaurant_hours(single_datetime_input)
-    assert single_datetime_result["success"] == True
-    assert single_datetime_result["rest"] == ""
-    assert single_datetime_result["stack"] == [
+    (data, rest) = parse_restaurant_hours(single_datetime_input)
+    assert data == [
         {
             "open_datetime": ModularDatetime(0, 9, 0),
             "close_datetime": ModularDatetime(0, 16, 0)
         }
     ]
+    assert rest == ""
 
     datetime_with_tail_input = "Tue-Thu 8 am - 9 pm Banana"
-    datetime_with_tail_result = parse_restaurant_hours(
-        datetime_with_tail_input)
-    assert datetime_with_tail_result["success"] == True
-    assert datetime_with_tail_result["rest"] == " Banana"
-    assert datetime_with_tail_result["stack"] == [
+    (data, rest) = parse_restaurant_hours(datetime_with_tail_input)
+    assert data == [
         {
             "open_datetime": ModularDatetime(1, 8, 0),
             "close_datetime": ModularDatetime(1, 21, 0)
@@ -1082,13 +891,11 @@ def test_parse_restaurant_hours():
             "close_datetime": ModularDatetime(3, 21, 0)
         }
     ]
+    assert rest == " Banana"
 
     multiple_datetimes_input = "Mon-Wed, Fri 8:00 am - 4:30 pm  / Sat 10 am - 2:30 pm"
-    multiple_datetimes_result = parse_restaurant_hours(
-        multiple_datetimes_input)
-    assert multiple_datetimes_result["success"] == True
-    assert multiple_datetimes_result["rest"] == ""
-    assert multiple_datetimes_result["stack"] == [
+    (data, rest) = parse_restaurant_hours(multiple_datetimes_input)
+    assert data == [
         {
             "open_datetime": ModularDatetime(0, 8, 0),
             "close_datetime": ModularDatetime(0, 16, 30)
@@ -1110,6 +917,7 @@ def test_parse_restaurant_hours():
             "close_datetime": ModularDatetime(5, 14, 30)
         },
     ]
+    assert rest == ""
 
 
 # Tests

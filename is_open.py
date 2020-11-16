@@ -28,10 +28,11 @@ def find_open_restaurants(csv_filename, search_datetime):
     for (i, rest) in enumerate(restaurants):
         result = parse_restaurant_hours(rest["hours_string"])
 
-        assert result["success"] == True
-        assert result["rest"] == ""
+        assert result is not None
+        (data, rest) = result
+        assert rest == ""
 
-        restaurants[i]["hours_datetimes"] = result["stack"]
+        restaurants[i]["hours_datetimes"] = data
 
     open_restaurants = []
     
