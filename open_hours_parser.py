@@ -109,10 +109,16 @@ def test_weekday():
     for fail_input in fail_inputs:
         assert weekday(fail_input) is None
 
-    pass_input = "Mon-Fri"
-    (data, rest) = weekday(pass_input)
-    assert data == [{"days": [0]}]
-    assert rest == "-Fri"
+    for (index, day) in enumerate(list(calendar.day_abbr)):
+        (data, rest) = weekday(day)
+        assert data == [{"days": [index]}]
+        assert rest == ""
+
+    tail = "-Fri"
+    for (index, day) in enumerate(list(calendar.day_abbr)):
+        (data, rest) = weekday(day + tail)
+        assert data == [{"days": [index]}]
+        assert rest == tail
 
 
 # Combinators
