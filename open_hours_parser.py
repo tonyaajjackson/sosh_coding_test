@@ -30,7 +30,7 @@ def test_char():
         (data, rest) = char(c)(c)
         assert data == []
         assert rest == ""
-    
+
     # With tail
     tail = " tail"
     for c in printable:
@@ -72,7 +72,7 @@ def test_numeral():
             }
         ]
         assert rest == ""
-    
+
     tail = " orange"
     for num in digits:
         (data, rest) = numeral(num + tail)
@@ -193,7 +193,7 @@ def test_either():
     (data, rest) = either(parsers)(pass_first_input)
     assert data == []
     assert rest == "Mon"
-    
+
     pass_second_input = "Mon "
     (data, rest) = either(parsers)(pass_second_input)
     assert data == [
@@ -227,18 +227,27 @@ def n_or_more(parser, n):
 
 def test_n_or_more():
     # Tests that should fail:
-    zero_match_input = "NoWeekdaysHere"
-    assert n_or_more(weekday, 1)(zero_match_input) is None
-
-    less_than_n_input = "MonBanana"
-    assert n_or_more(weekday, 2)(less_than_n_input) is None
-
-    empty_string_input = ""
-    assert n_or_more(char("a"), 1)(empty_string_input) is None
+    fail_inputs = [
+        "",
+        "a",
+        "ab"
+    ]
+    for fail_input in fail_inputs:
+        assert n_or_more(char("a"), 2)(fail_input) is None
 
     # Tests that should pass
-    pass_with_tail_input = "MonTueWedBanana"
-    (data, rest) = n_or_more(weekday, 2)(pass_with_tail_input)
+    pass_without_tail_input = "aaaaaa"
+    (data, rest) = n_or_more(char("a"), 6)(pass_without_tail_input)
+    assert data == []
+    assert rest == ""
+
+    pass_with_tail_input = "aaaaaaBanana"
+    (data, rest) = n_or_more(char("a"), 6)(pass_with_tail_input)
+    assert data == []
+    assert rest == "Banana"
+
+    pass_with_return_data_input = "MonTueWed"
+    (data, rest) = n_or_more(weekday, 2)(pass_with_return_data_input)
     assert data == [
         {
             "days": [0]
@@ -250,11 +259,6 @@ def test_n_or_more():
             "days": [2]
         }
     ]
-    assert rest == "Banana"
-
-    pass_without_tail_input = "aaaaaa"
-    (data, rest) = n_or_more(char("a"), 6)(pass_without_tail_input)
-    assert data == []
     assert rest == ""
 
     n_equals_zero_on_empty_string_input = ""
