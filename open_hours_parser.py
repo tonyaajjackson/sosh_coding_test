@@ -1,5 +1,6 @@
 import calendar
 from modular_datetime import ModularDatetime, datetime_in_range
+from string import printable
 
 
 # Primitive parsers
