@@ -182,11 +182,20 @@ def test_either():
         weekday
     ]
 
-    fail_input = "? Mon"
-    assert either(parsers)(fail_input) is None
+    fail_inputs = [
+        "",
+        "? Mon"
+    ]
+    for fail_input in fail_inputs:
+        assert either(parsers)(fail_input) is None
 
-    pass_input = "Mon "
-    (data, rest) = either(parsers)(pass_input)
+    pass_first_input = " Mon"
+    (data, rest) = either(parsers)(pass_first_input)
+    assert data == []
+    assert rest == "Mon"
+    
+    pass_second_input = "Mon "
+    (data, rest) = either(parsers)(pass_second_input)
     assert data == [
         {
             "days": [0]
