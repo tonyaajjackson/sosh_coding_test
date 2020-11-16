@@ -146,8 +146,12 @@ def test_sequence():
         weekday
     ]
 
-    fail_input = "Mon?"
-    assert sequence(parsers)(fail_input) is None
+    fail_inputs = [
+        "",
+        "Mon?"
+    ]
+    for fail_input in fail_inputs:
+        assert sequence(parsers)(fail_input) is None
 
     pass_input = "Mon-Fri"
     (data, rest) = sequence(parsers)(pass_input)
