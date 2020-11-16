@@ -1,6 +1,6 @@
 import calendar
 from modular_datetime import ModularDatetime, datetime_in_range
-from string import printable
+from string import printable, digits
 
 
 # Primitive parsers
@@ -64,14 +64,24 @@ def test_numeral():
     for fail_input in fail_inputs:
         assert numeral(fail_input) is None
 
-    pass_input = "55"
-    (data, rest) = numeral(pass_input)
-    assert data == [
-        {
-            "numeral": 5
-        }
-    ]
-    assert rest == "5"
+    for num in digits:
+        (data, rest) = numeral(num)
+        assert data == [
+            {
+                "numeral": int(num)
+            }
+        ]
+        assert rest == ""
+    
+    tail = " orange"
+    for num in digits:
+        (data, rest) = numeral(num + tail)
+        assert data == [
+            {
+                "numeral": int(num)
+            }
+        ]
+        assert rest == tail
 
 
 def weekday(input):
