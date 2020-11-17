@@ -511,26 +511,39 @@ def number(input):
 
 
 def test_number():
-    fail_input = "aa"
-    assert number(fail_input) is None
+    fail_inputs = [
+        "",
+        "aa"
+    ]
+    for fail_input in fail_inputs:
+        assert number(fail_input) is None
 
-    pass_single_input = "5a"
+    pass_single_input = "5"
     (data, rest) = number(pass_single_input)
     assert data == [
         {
             "number_found": 5
         }
     ]
+    assert rest == ""
+
+    pass_with_tail_input = "6a"
+    (data, rest) = number(pass_with_tail_input)
+    assert data == [
+        {
+            "number_found": 6
+        }
+    ]
     assert rest == "a"
 
-    pass_double_input = "56a5"
+    pass_double_input = "56"
     (data, rest) = number(pass_double_input)
     assert data == [
         {
             "number_found": 56
         }
     ]
-    assert rest == "a5"
+    assert rest == ""
 
     pass_triple_input = "567"
     (data, rest) = number(pass_triple_input)
