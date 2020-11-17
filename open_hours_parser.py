@@ -712,17 +712,24 @@ def minute(input):
 
 
 def test_minute():
-    fail_input = "75"
-    assert minute(fail_input) is None
-
-    pass_input = "38a"
-    (data, rest) = minute(pass_input)
-    assert data == [
-        {
-            "minute": 38
-        }
+    fail_inputs = [
+        "",
+        "75"
     ]
-    assert rest == "a"
+
+    for fail_input in fail_inputs:
+        assert minute(fail_input) is None
+
+    
+    for tail in ["", "tail"]:
+        for min_input in range(0, 59+1):
+            (data, rest) = minute(str(min_input) + tail)
+            assert data == [
+                {
+                    "minute": min_input
+                }
+            ]
+            assert rest == tail
 
 
 def time(input):
