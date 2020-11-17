@@ -456,6 +456,21 @@ def test_days():
     ]
     assert rest == ""
 
+    days_with_rollover_input = "Wed, Sat-Tue"
+    (data, rest) = days(days_with_rollover_input)
+    assert data == [
+        {
+            "days_all": [
+                DatetimeModWeek(2, 0, 0),
+                DatetimeModWeek(5, 0, 0),
+                DatetimeModWeek(6, 0, 0),
+                DatetimeModWeek(0, 0, 0),
+                DatetimeModWeek(1, 0, 0)
+            ]
+        }
+    ]
+    assert rest == ""
+
     pass_with_tail_input = "Mon-Tue, Thu, Sat-Sun 9:00"
     (data, rest) = days(pass_with_tail_input)
     assert data == [
