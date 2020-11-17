@@ -306,7 +306,7 @@ def day_range(input):
         current_day = start_day
         days = []
 
-        # Add one_day to exclude end_day from generated range
+        # Add one_day to include end_day in generated range
         while current_day != (end_day + one_day):
             days.append(current_day)
             current_day += one_day
