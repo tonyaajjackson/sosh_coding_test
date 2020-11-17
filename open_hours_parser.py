@@ -886,6 +886,7 @@ def time_range(input):
 def test_time_range():
     # Tests that should fail
     fail_inputs = [
+        "", # Empty string
         "asdf",  # No valid input
         "9:45 am",  # Only one time
         "9:45 am - ",  # Only one time with separator
