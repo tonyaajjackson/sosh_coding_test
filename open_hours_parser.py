@@ -577,27 +577,36 @@ def number_in_range(input, n, m):
 
 
 def test_number_in_range():
+    n = 5
+    m = 12
+    
     # Tests that should fail
     fail_inputs = [
         "a",
-        "13",
-        "4"
+        n - 1,
+        m
     ]
     for fail_input in fail_inputs:
-        assert number_in_range(fail_input, 5, 12) is None
+        assert number_in_range(str(fail_input), n, m) is None
 
     # Tests that should succeed
-    pass_without_tail_input = "10"
-    (data, rest) = number_in_range(pass_without_tail_input, 0, 12)
-    assert data == [
-        {
-            "number_found": 10
-        }
+    pass_without_tail_inputs = [
+        n,
+        10,
+        m -1
     ]
-    assert rest == ""
+
+    for pass_input in pass_without_tail_inputs:
+        (data, rest) = number_in_range(str(pass_input), n, m)
+        assert data == [
+            {
+                "number_found": pass_input
+            }
+        ]
+        assert rest == ""
 
     pass_with_tail_input = "7c"
-    (data, rest) = number_in_range(pass_with_tail_input, 0, 12)
+    (data, rest) = number_in_range(pass_with_tail_input, n, m)
     assert data == [
         {
             "number_found": 7
