@@ -678,17 +678,22 @@ def hour(input):
 
 
 def test_hour():
-    fail_input = "16"
-    assert hour(fail_input) is None
-
-    pass_input = "6a"
-    (data, rest) = hour(pass_input)
-    assert data == [
-        {
-            "hour": 6
-        }
+    fail_inputs = [
+        "",
+        "16"
     ]
-    assert rest == "a"
+    for fail_input in fail_inputs:
+        assert hour(fail_input) is None
+
+    for tail in ["", "tail"]:
+        for hour_input in range(1, 12+1):
+            (data, rest) = hour(str(hour_input) + tail)
+            assert data == [
+                {
+                    "hour": hour_input
+                }
+            ]
+            assert rest == tail
 
 
 def minute(input):
