@@ -1,6 +1,6 @@
 import csv
 from datetime import datetime
-from open_hours_parser import parse_restaurant_hours
+from open_hours_parser import parse
 from modular_datetime import DatetimeModWeek, datetime_in_range
 
 
@@ -26,7 +26,7 @@ def find_open_restaurants(csv_filename, search_datetime):
         )
 
     for (i, rest) in enumerate(restaurants):
-        result = parse_restaurant_hours(rest["hours_string"])
+        result = parse(rest["hours_string"])
 
         assert result is not None
         (data, rest) = result
