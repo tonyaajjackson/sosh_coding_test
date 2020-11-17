@@ -784,6 +784,7 @@ def time(input):
 def test_time():
     # Tests that should fail
     fail_inputs = [
+        "",
         "abcde",
         "12cde",
         "12:45 cde"
