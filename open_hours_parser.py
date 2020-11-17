@@ -1,5 +1,5 @@
 import calendar
-from modular_datetime import DatetimeModWeek, datetime_in_range
+from modular_datetime import ModularDatetime, datetime_in_range
 from string import printable, digits
 
 
@@ -94,7 +94,7 @@ def weekday(input):
         return (
             [
                 {
-                    "days": [DatetimeModWeek(day_num, 0, 0)]
+                    "days": [ModularDatetime(day_num, 0, 0)]
                 }
             ],
             input[3:],
@@ -116,7 +116,7 @@ def test_weekday():
         assert data == [
             {
                 "days": [
-                    DatetimeModWeek(index, 0, 0)
+                    ModularDatetime(index, 0, 0)
                 ]
             }
         ]
@@ -128,7 +128,7 @@ def test_weekday():
         assert data == [
             {
                 "days": [
-                    DatetimeModWeek(index, 0, 0)
+                    ModularDatetime(index, 0, 0)
                 ]
             }
         ]
@@ -171,10 +171,10 @@ def test_sequence():
     (data, rest) = sequence(parsers)(pass_input)
     assert data == [
         {
-            "days": [DatetimeModWeek(0, 0, 0)]
+            "days": [ModularDatetime(0, 0, 0)]
         },
         {
-            "days": [DatetimeModWeek(4, 0, 0)]
+            "days": [ModularDatetime(4, 0, 0)]
         }
     ]
     assert rest == ""
@@ -264,13 +264,13 @@ def test_n_or_more():
     (data, rest) = n_or_more(weekday, 2)(pass_with_return_data_input)
     assert data == [
         {
-            "days": [DatetimeModWeek(0, 0, 0)]
+            "days": [ModularDatetime(0, 0, 0)]
         },
         {
-            "days": [DatetimeModWeek(1, 0, 0)]
+            "days": [ModularDatetime(1, 0, 0)]
         },
         {
-            "days": [DatetimeModWeek(2, 0, 0)]
+            "days": [ModularDatetime(2, 0, 0)]
         }
     ]
     assert rest == ""
@@ -302,7 +302,7 @@ def day_range(input):
         end_day = data[1]["days"][0]
 
         # Make range with modular arithmetic
-        one_day = DatetimeModWeek(1, 0, 0)
+        one_day = ModularDatetime(1, 0, 0)
         current_day = start_day
         days = []
 
@@ -331,10 +331,10 @@ def test_day_range():
     assert data == [
         {
             "days": [
-                DatetimeModWeek(2, 0, 0),
-                DatetimeModWeek(3, 0, 0),
-                DatetimeModWeek(4, 0, 0),
-                DatetimeModWeek(5, 0, 0),
+                ModularDatetime(2, 0, 0),
+                ModularDatetime(3, 0, 0),
+                ModularDatetime(4, 0, 0),
+                ModularDatetime(5, 0, 0),
             ]
         }
     ]
@@ -345,11 +345,11 @@ def test_day_range():
     assert data == [
         {
             "days": [
-                DatetimeModWeek(0, 0, 0),
-                DatetimeModWeek(1, 0, 0),
-                DatetimeModWeek(2, 0, 0),
-                DatetimeModWeek(3, 0, 0),
-                DatetimeModWeek(4, 0, 0),
+                ModularDatetime(0, 0, 0),
+                ModularDatetime(1, 0, 0),
+                ModularDatetime(2, 0, 0),
+                ModularDatetime(3, 0, 0),
+                ModularDatetime(4, 0, 0),
             ]
         }
     ]
@@ -360,10 +360,10 @@ def test_day_range():
     assert data == [
         {
             "days": [
-                DatetimeModWeek(5, 0, 0),
-                DatetimeModWeek(6, 0, 0),
-                DatetimeModWeek(0, 0, 0),
-                DatetimeModWeek(1, 0, 0),
+                ModularDatetime(5, 0, 0),
+                ModularDatetime(6, 0, 0),
+                ModularDatetime(0, 0, 0),
+                ModularDatetime(1, 0, 0),
             ]
         }
     ]
@@ -418,12 +418,11 @@ def test_days():
         assert days(fail_input) is None
 
     # Tests that should pass
-    # TODO check tests from here forward
     single_day_input = "Wed"
     (data, rest) = days(single_day_input)
     assert data == [
         {
-            "days_all": [DatetimeModWeek(2, 0, 0)]
+            "days_all": [ModularDatetime(2, 0, 0)]
         }
     ]
     assert rest == ""
@@ -433,11 +432,11 @@ def test_days():
     assert data == [
         {
             "days_all": [
-                DatetimeModWeek(0, 0, 0),
-                DatetimeModWeek(1, 0, 0),
-                DatetimeModWeek(2, 0, 0),
-                DatetimeModWeek(3, 0, 0),
-                DatetimeModWeek(4, 0, 0),
+                ModularDatetime(0, 0, 0),
+                ModularDatetime(1, 0, 0),
+                ModularDatetime(2, 0, 0),
+                ModularDatetime(3, 0, 0),
+                ModularDatetime(4, 0, 0),
             ]
         }
     ]
@@ -448,10 +447,10 @@ def test_days():
     assert data == [
         {
             "days_all": [
-                DatetimeModWeek(0, 0, 0),
-                DatetimeModWeek(1, 0, 0),
-                DatetimeModWeek(2, 0, 0),
-                DatetimeModWeek(4, 0, 0),
+                ModularDatetime(0, 0, 0),
+                ModularDatetime(1, 0, 0),
+                ModularDatetime(2, 0, 0),
+                ModularDatetime(4, 0, 0),
             ]
         }
     ]
@@ -462,11 +461,11 @@ def test_days():
     assert data == [
         {
             "days_all": [
-                DatetimeModWeek(0, 0, 0),
-                DatetimeModWeek(1, 0, 0),
-                DatetimeModWeek(3, 0, 0),
-                DatetimeModWeek(5, 0, 0),
-                DatetimeModWeek(6, 0, 0),
+                ModularDatetime(0, 0, 0),
+                ModularDatetime(1, 0, 0),
+                ModularDatetime(3, 0, 0),
+                ModularDatetime(5, 0, 0),
+                ModularDatetime(6, 0, 0),
             ]
         }
     ]
@@ -620,10 +619,8 @@ def hour(input):
     ):
         (data, rest) = result
 
-        data[0]["hour"] = DatetimeModDay(
-            data[0].pop("number_found"),
-            0
-        )
+        # Change "number_found" to "hour"
+        data[0]["hour"] = data[0].pop("number_found")
         return (data, rest)
     else:
         return None
@@ -637,7 +634,7 @@ def test_hour():
     (data, rest) = hour(pass_input)
     assert data == [
         {
-            "hour": DatetimeModDay(6, 0)
+            "hour": 6
         }
     ]
     assert rest == "a"
@@ -652,11 +649,7 @@ def minute(input):
         (data, rest) = result
 
         # Change "number_found" to "minute"
-        data[0]["minute"] = DatetimeModWeek(
-            0,
-            0,
-            data[0].pop("number_found")
-        )
+        data[0]["minute"] = data[0].pop("number_found")
         return (data, rest)
     else:
         return None
@@ -670,7 +663,7 @@ def test_minute():
     (data, rest) = minute(pass_input)
     assert data == [
         {
-            "minute": DatetimeModWeek(0, 0, 38)
+            "minute": 38
         }
     ]
     assert rest == "a"
@@ -711,7 +704,7 @@ def time(input):
             found_hour = (found_hour + 12) % 24
             # Convert to 24 hour clock with range [0, 23]
 
-        found_time = DatetimeModWeek(0, found_hour, found_minute)
+        found_time = ModularDatetime(0, found_hour, found_minute)
 
         return (
             [
@@ -741,7 +734,7 @@ def test_time():
     (data, rest) = time(single_digit_input)
     assert data == [
         {
-            "time": DatetimeModWeek(0, 1, 2)
+            "time": ModularDatetime(0, 1, 2)
         }
     ]
     assert rest == ""
@@ -750,7 +743,7 @@ def test_time():
     (data, rest) = time(single_digit_with_tail_input)
     assert data == [
         {
-            "time": DatetimeModWeek(0, 3, 5)
+            "time": ModularDatetime(0, 3, 5)
         }
     ]
     assert rest == " banana"
@@ -759,7 +752,7 @@ def test_time():
     (data, rest) = time(double_digit_input)
     assert data == [
         {
-            "time": DatetimeModWeek(0, 10, 56)
+            "time": ModularDatetime(0, 10, 56)
         }
     ]
     assert rest == ""
@@ -768,7 +761,7 @@ def test_time():
     (data, rest) = time(pm_input)
     assert data == [
         {
-            "time": DatetimeModWeek(0, 18, 24)
+            "time": ModularDatetime(0, 18, 24)
         }
     ]
     assert rest == ""
@@ -777,7 +770,7 @@ def test_time():
     (data, rest) = time(noon_pm_input)
     assert data == [
         {
-            "time": DatetimeModWeek(0, 12, 56)
+            "time": ModularDatetime(0, 12, 56)
         }
     ]
     assert rest == ""
@@ -786,7 +779,7 @@ def test_time():
     (data, rest) = time(midnight_am_input)
     assert data == [
         {
-            "time": DatetimeModWeek(0, 0, 43)
+            "time": ModularDatetime(0, 0, 43)
         }
     ]
     assert rest == ""
@@ -795,7 +788,7 @@ def test_time():
     (data, rest) = time(no_minute_input)
     assert data == [
         {
-            "time": DatetimeModWeek(0, 9, 0)
+            "time": ModularDatetime(0, 9, 0)
         }
     ]
     assert rest == ""
@@ -842,8 +835,8 @@ def test_time_range():
     (data, rest) = time_range(pass_without_tail_input)
     assert data == [
         {
-            "open_time": DatetimeModWeek(0, 9, 45),
-            "close_time": DatetimeModWeek(0, 22, 15)
+            "open_time": ModularDatetime(0, 9, 45),
+            "close_time": ModularDatetime(0, 22, 15)
         }
     ]
     assert rest == ""
@@ -852,8 +845,8 @@ def test_time_range():
     (data, rest) = time_range(pass_with_tail_input)
     assert data == [
         {
-            "open_time": DatetimeModWeek(0, 16, 15),
-            "close_time": DatetimeModWeek(0, 2, 38)
+            "open_time": ModularDatetime(0, 16, 15),
+            "close_time": ModularDatetime(0, 2, 38)
         }
     ]
     assert rest == " Monday"
@@ -873,9 +866,9 @@ def datetime(input):
         hours = []
 
         if times_found["close_time"] < times_found["open_time"]:
-            day_rollover = DatetimeModWeek(1, 0, 0)
+            day_rollover = ModularDatetime(1, 0, 0)
         else:
-            day_rollover = DatetimeModWeek(0, 0, 0)
+            day_rollover = ModularDatetime(0, 0, 0)
 
         for day_found in days_all_found:
             hours.append({
@@ -905,8 +898,8 @@ def test_datetime():
     (data, rest) = datetime(single_day_input)
     assert data == [
         {
-            "open_datetime": DatetimeModWeek(0, 9, 45),
-            "close_datetime": DatetimeModWeek(0, 18, 0)
+            "open_datetime": ModularDatetime(0, 9, 45),
+            "close_datetime": ModularDatetime(0, 18, 0)
         }
     ]
     assert rest == ""
@@ -915,20 +908,20 @@ def test_datetime():
     (data, rest) = datetime(multiple_day_input)
     assert data == [
         {
-            "open_datetime": DatetimeModWeek(0, 10, 15),
-            "close_datetime": DatetimeModWeek(0, 17, 0)
+            "open_datetime": ModularDatetime(0, 10, 15),
+            "close_datetime": ModularDatetime(0, 17, 0)
         },
         {
-            "open_datetime": DatetimeModWeek(1, 10, 15),
-            "close_datetime": DatetimeModWeek(1, 17, 0)
+            "open_datetime": ModularDatetime(1, 10, 15),
+            "close_datetime": ModularDatetime(1, 17, 0)
         },
         {
-            "open_datetime": DatetimeModWeek(2, 10, 15),
-            "close_datetime": DatetimeModWeek(2, 17, 0)
+            "open_datetime": ModularDatetime(2, 10, 15),
+            "close_datetime": ModularDatetime(2, 17, 0)
         },
         {
-            "open_datetime": DatetimeModWeek(4, 10, 15),
-            "close_datetime": DatetimeModWeek(4, 17, 0)
+            "open_datetime": ModularDatetime(4, 10, 15),
+            "close_datetime": ModularDatetime(4, 17, 0)
         }
     ]
     assert rest == ""
@@ -937,8 +930,8 @@ def test_datetime():
     (data, rest) = datetime(day_overflow_input)
     assert data == [
         {
-            "open_datetime": DatetimeModWeek(0, 13, 0),
-            "close_datetime": DatetimeModWeek(1, 2, 30)
+            "open_datetime": ModularDatetime(0, 13, 0),
+            "close_datetime": ModularDatetime(1, 2, 30)
         }
     ]
     assert rest == ""
@@ -947,8 +940,8 @@ def test_datetime():
     (data, rest) = datetime(week_overflow_input)
     assert data == [
         {
-            "open_datetime": DatetimeModWeek(6, 11, 0),
-            "close_datetime": DatetimeModWeek(0, 4, 15)
+            "open_datetime": ModularDatetime(6, 11, 0),
+            "close_datetime": ModularDatetime(0, 4, 15)
         }
     ]
     assert rest == ""
@@ -996,8 +989,8 @@ def test_parse_restaurant_hours():
     (data, rest) = parse_restaurant_hours(single_datetime_input)
     assert data == [
         {
-            "open_datetime": DatetimeModWeek(0, 9, 0),
-            "close_datetime": DatetimeModWeek(0, 16, 0)
+            "open_datetime": ModularDatetime(0, 9, 0),
+            "close_datetime": ModularDatetime(0, 16, 0)
         }
     ]
     assert rest == ""
@@ -1006,16 +999,16 @@ def test_parse_restaurant_hours():
     (data, rest) = parse_restaurant_hours(datetime_with_tail_input)
     assert data == [
         {
-            "open_datetime": DatetimeModWeek(1, 8, 0),
-            "close_datetime": DatetimeModWeek(1, 21, 0)
+            "open_datetime": ModularDatetime(1, 8, 0),
+            "close_datetime": ModularDatetime(1, 21, 0)
         },
         {
-            "open_datetime": DatetimeModWeek(2, 8, 0),
-            "close_datetime": DatetimeModWeek(2, 21, 0)
+            "open_datetime": ModularDatetime(2, 8, 0),
+            "close_datetime": ModularDatetime(2, 21, 0)
         },
         {
-            "open_datetime": DatetimeModWeek(3, 8, 0),
-            "close_datetime": DatetimeModWeek(3, 21, 0)
+            "open_datetime": ModularDatetime(3, 8, 0),
+            "close_datetime": ModularDatetime(3, 21, 0)
         }
     ]
     assert rest == " Banana"
@@ -1024,24 +1017,24 @@ def test_parse_restaurant_hours():
     (data, rest) = parse_restaurant_hours(multiple_datetimes_input)
     assert data == [
         {
-            "open_datetime": DatetimeModWeek(0, 8, 0),
-            "close_datetime": DatetimeModWeek(0, 16, 30)
+            "open_datetime": ModularDatetime(0, 8, 0),
+            "close_datetime": ModularDatetime(0, 16, 30)
         },
         {
-            "open_datetime": DatetimeModWeek(1, 8, 0),
-            "close_datetime": DatetimeModWeek(1, 16, 30)
+            "open_datetime": ModularDatetime(1, 8, 0),
+            "close_datetime": ModularDatetime(1, 16, 30)
         },
         {
-            "open_datetime": DatetimeModWeek(2, 8, 0),
-            "close_datetime": DatetimeModWeek(2, 16, 30)
+            "open_datetime": ModularDatetime(2, 8, 0),
+            "close_datetime": ModularDatetime(2, 16, 30)
         },
         {
-            "open_datetime": DatetimeModWeek(4, 8, 0),
-            "close_datetime": DatetimeModWeek(4, 16, 30)
+            "open_datetime": ModularDatetime(4, 8, 0),
+            "close_datetime": ModularDatetime(4, 16, 30)
         },
         {
-            "open_datetime": DatetimeModWeek(5, 10, 0),
-            "close_datetime": DatetimeModWeek(5, 14, 30)
+            "open_datetime": ModularDatetime(5, 10, 0),
+            "close_datetime": ModularDatetime(5, 14, 30)
         },
     ]
     assert rest == ""
