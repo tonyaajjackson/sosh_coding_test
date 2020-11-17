@@ -635,11 +635,25 @@ def string(search_string):
 def test_string():
     search_string = "abcd"
 
-    fail_input = "qwerty"
-    assert string(search_string)(fail_input) is None
+    fail_inputs = [
+        "",
+        "qwerty"
+    ]
+    
+    for fail_input in fail_inputs:
+        assert string(search_string)(fail_input) is None
 
-    pass_input = "abcde"
-    (data, rest) = string(search_string)(pass_input)
+    pass_without_tail_input = "abcd"
+    (data, rest) = string(search_string)(pass_without_tail_input)
+    assert data == [
+        {
+            "string": search_string
+        }
+    ]
+    assert rest == ""
+    
+    pass_with_tail_input = "abcde"
+    (data, rest) = string(search_string)(pass_with_tail_input)
     assert data == [
         {
             "string": search_string
