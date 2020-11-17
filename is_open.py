@@ -1,14 +1,14 @@
 import csv
 from datetime import datetime
 from open_hours_parser import parse_restaurant_hours
-from modular_datetime import ModularDatetime, datetime_in_range
+from modular_datetime import DatetimeModWeek, datetime_in_range
 
 
 def find_open_restaurants(csv_filename, search_datetime):
     with open(csv_filename, newline="") as f:
         entries = list(csv.reader(f))
 
-    search_datetime_modular = ModularDatetime(
+    search_datetime_modular = DatetimeModWeek(
         search_datetime.weekday(),
         search_datetime.hour,
         search_datetime.minute
