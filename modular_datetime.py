@@ -14,7 +14,7 @@ class DatetimeModWeek:
         return Mod(raw_datetime, seconds_per_week)
 
 
-def test_modular_datetime():
+def _test_modular_datetime():
     # Tests that should fail
     invalid_inputs = [
         [-1, 10, 10, "Day"],
@@ -63,7 +63,7 @@ def datetime_in_range(start, end, current):
     return current_delta < end_delta
 
 
-def test_current_in_range():
+def _test_datetime_in_range():
     # No overflow
     test_inputs = [
         [
@@ -109,5 +109,5 @@ def test_current_in_range():
 
 
 # Tests
-test_modular_datetime()
-test_current_in_range()
+_test_modular_datetime()
+_test_datetime_in_range()
