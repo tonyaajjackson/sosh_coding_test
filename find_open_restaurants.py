@@ -47,10 +47,12 @@ def find_open_restaurants(csv_filename, search_datetime):
     
     return open_restaurants
 
+def test_find_open_restaurants():
+    csv_filename = "rest_hours.csv"
+    search_datetime = datetime(2020, 11, 14, 13, 45)
 
-csv_filename = "rest_hours.csv"
-search_datetime = datetime(2020, 11, 14, 13, 45)
+    open_restaurants = find_open_restaurants(csv_filename, search_datetime)
 
-open_restaurants = find_open_restaurants(csv_filename, search_datetime)
+    print(open_restaurants)
 
-print(open_restaurants)
+test_find_open_restaurants()
