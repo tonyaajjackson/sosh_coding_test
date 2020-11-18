@@ -1104,27 +1104,27 @@ def _test_parse():
     ]
     assert rest == ""
 
+if __name__ == "__main__":
+    # ==== Tests ====
+    # Primitive parsers
+    _test_char()
+    _test_numeral()
+    _test_weekday()
 
-# ==== Tests ====
-# Primitive parsers
-_test_char()
-_test_numeral()
-_test_weekday()
+    # Combinators
+    _test_sequence()
+    _test_either()
+    _test_n_or_more()
 
-# Combinators
-_test_sequence()
-_test_either()
-_test_n_or_more()
-
-# Combined parsers
-_test_day_range()
-_test_days()
-_test_number()
-_test_number_in_range()
-_test_string()
-_test_hour()
-_test_minute()
-_test_time()
-_test_time_range()
-_test_datetime()
-_test_parse()
+    # Combined parsers
+    _test_day_range()
+    _test_days()
+    _test_number()
+    _test_number_in_range()
+    _test_string()
+    _test_hour()
+    _test_minute()
+    _test_time()
+    _test_time_range()
+    _test_datetime()
+    _test_parse()

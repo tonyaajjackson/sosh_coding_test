@@ -12,7 +12,7 @@ Implements a modular arithmetic datetime with a modulus of one week to elegantly
 With modular arithmetic, if a restaurant is open from `start` to `finish`, a given `time` is between `start` and `finish` if `(time - start) < (end - start)`, even if `start` and `finish` span the week overflow boundary. This removes the need for edge case testing around rollovers.
 
 ### Comes With Tests & Fuzzer
-Each parser comes with tests expected to fail and tests expected to pass, including as many edge cases as I could discover. Tests automatically run on import and provide redundancy of expression of expected behaviour.
+Each parser comes with tests expected to fail and tests expected to pass, including as many edge cases as I could discover. Tests provide redundancy of expression of expected behaviour and have made refactoring safer and easier.
 
 Also included is a parser fuzzer to flesh out unexpected edge cases by triggering failures in the tests.
 

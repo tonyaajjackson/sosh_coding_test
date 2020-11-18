@@ -55,4 +55,5 @@ def test_find_open_restaurants():
 
     print(open_restaurants)
 
-test_find_open_restaurants()
+if __name__ == "__main__":
+    test_find_open_restaurants()

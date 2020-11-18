@@ -109,5 +109,6 @@ def _test_datetime_in_range():
 
 
 # Tests
-_test_modular_datetime()
-_test_datetime_in_range()
+if __name__ == "__main__":
+    _test_modular_datetime()
+    _test_datetime_in_range()
